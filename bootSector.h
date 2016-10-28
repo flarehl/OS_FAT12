@@ -14,8 +14,8 @@ typedef struct {
 	unsigned int sectorPerFAT;
 	unsigned int sectorPerTrack;
 	unsigned int numHeads;
-	char* bootSig;
-	char* volumeID;
+	unsigned int bootSig;
+	unsigned int volumeID;
 
 	//add one to byte value bc NULL character for char arrays
 	char volumeLabel[12]; 
