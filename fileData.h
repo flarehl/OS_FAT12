@@ -1,8 +1,7 @@
-#include <stdlib.h>
-
 #ifndef FILE_DATA_H
 #define FILE_DATA_H
 
+#include <stdlib.h> //why do I need this in here again?
 
 struct FileData{
 
