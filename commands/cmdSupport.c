@@ -186,22 +186,21 @@ FileData readEntry(char* buffer, int *offset){
 
    FileData entry;
 
-   for(int i = 0; i < 8 || buffer[*offset] != '\0'; i++){
+   int i;
+   for(i = 0; i < 8; i++){
       entry.fileName[i] = buffer[*offset];
       (*offset)++;
    }
+   entry.fileName[i] = '\0';
 
-   /* TEST */ printf("offset after name %d\n", *offset);
-
-   for(int i = 0; i < 3; i++){
-      entry.fileExt[i] = buffer[*offset];
+   for(i = 0; i < 3; i++){
+      entry.fileExt[i] = buffer[*offset];          
       (*offset)++;
    }
+   entry.fileExt[i] = '\0';
 
    entry.fileAttributes = buffer[*offset];
    (*offset)++;
-
-   /* TEST */ printf("offsets @ reserved: %d\n", *offset);
 
    short mostSignificantBits = (((short)buffer[*offset+1]) << 8) & 0xff00;
    short leastSignificantBits = ((short)buffer[*offset]) & 0x00ff;
@@ -209,37 +208,43 @@ FileData readEntry(char* buffer, int *offset){
 
    *offset += 2;
 
-   for(int i = 0; i < 2; i++){
+   for(i = 0; i < 2; i++){
       entry.createTime[i] = buffer[*offset];
       (*offset)++;
-
    }
+   entry.createTime[i] = '\0';
 
-   for(int i = 0; i < 2; i++){
+   for(i = 0; i < 2; i++){
       entry.createDate[i] = buffer[*offset];
       (*offset)++;
-   }  
+   }
+   entry.createDate[i] = '\0';  
 
-   for(int i = 0; i < 2; i++){
+   for(i = 0; i < 2; i++){
       entry.lastAccessDate[i] = buffer[*offset];
       (*offset)++;
    }
+   entry.lastAccessDate[i] = '\0';
 
-   for(int i = 0; i < 2; i++){
+   //ignore 2 bytes here
+   (*offset)+=2;
+
+   for(i = 0; i < 2; i++){
       entry.lastWriteTime[i] = buffer[*offset];
       (*offset)++;
    }
+   entry.lastWriteTime[i] = '\0';
 
 
-   for(int i = 0; i < 2; i++){
+   for(i = 0; i < 2; i++){
       entry.lastWriteDate[i] = buffer[*offset];
       (*offset)++;
    }
+   entry.lastWriteDate[i] = '\0';
 
    mostSignificantBits = (((short)buffer[*offset+1]) << 8) & 0xff00;
    leastSignificantBits = ((short)buffer[*offset]) & 0x00ff;
    entry.flc = mostSignificantBits | leastSignificantBits;
-
    *offset += 2;
 
    mostSignificantBits = (((int)buffer[*offset+3]) << 24) & 0xff000000;
@@ -247,6 +252,8 @@ FileData readEntry(char* buffer, int *offset){
    int midBits2 = ((int)buffer[*offset+1] << 8) & 0x0000ff00;
    leastSignificantBits = ((int)buffer[*offset]) & 0x000000ff;
    entry.fileSize = (mostSignificantBits | midBits | midBits2 | leastSignificantBits) ;
+
+   *offset += 4;
 
    return entry;
 }

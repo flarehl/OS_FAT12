@@ -7,14 +7,13 @@ int main(int argc, char **argv)
 	/* Initialize shared memory segment*/
 	void *shPtr;
 	CurrentPath cPath;
-	char dir[] = "root";
+	char dir[] = "root/";
 
 	createShmem(&shPtr); //passing address of the pointer, int value
 
 	memset(cPath.path, '\0', MAX_PATH);
 
-	for(int i = 0; i < 4; i++)
-		cPath.path[i] = dir[i];
+	strncpy(cPath.path, dir, 5);
 	cPath.sectorNum = 19;
 	memcpy(shPtr, &cPath, SHMEMSIZE); //should send to cd
 
@@ -29,7 +28,7 @@ int main(int argc, char **argv)
 		args = parseInput(line);
 
 		if( (strncmp(args[0], "exit", 4) == 0) || (strncmp(args[0], "logout", 6) == 0) )
-			break; // don't use break; LATER, doesn't work without it
+			break; // use continue to break out of do while loop
 
 		executeCmd(args);
 

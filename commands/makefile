@@ -1,4 +1,4 @@
-commands: pbs pfe ls cd
+commands: pbs pfe ls cd pwd
 
 pbs: pbs.c
 	gcc -o pbs pbs.c cmdSupport.c -I.
@@ -11,3 +11,6 @@ ls: ls.c
 
 cd: cd.c
 	gcc -o cd cd.c cmdSupport.c ../utilities/shmem.c -I.
+
+pwd: pwd.c
+	gcc -o pwd pwd.c cmdSupport.c ../utilities/shmem.c -I.

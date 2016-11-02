@@ -14,41 +14,53 @@ int main(int argc, char** argv) {
 	char *buffer = (char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
 	FileData entry;
 
-	int rootSector = 19,
-		offset = 0,
-		numSectors = 0;
+	int offset = 0,
+		numSector = 19;
 
-	printf("%-12s %7s %12s %6s\n", "File Name", "Type", "File Size", "FLC");
+	printf("%-13s %7s %12s %6s\n", "File Name", "Type", "File Size", "FLC");
 
 	do { //for reading in entries from struct
 
-		if (read_sector(rootSector, buffer) == -1) {
+		if (read_sector(numSector, buffer) == -1) {
 			printf("Something has gone wrong -- could not read the boot sector\n");
 			return -1;
 		}
 
-		for(int i = 0; i < 16; i++){
+		for(int i = 0; i < 16; i++){ // 16 entries per sector
 
 			FileData nEntry;
-			entry = nEntry; //to reset values, spaghetti
+			entry = nEntry; //to reset values, spaghettiiiiiii
 
 			entry = readEntry(buffer, &offset);
 
-			if( entry.fileAttributes == 0x0f ){
-				/* TEST */ printf("ignore this 32 byte entry\n");
+			if( entry.fileName[0] == (char)0x00 ){
+				break; //fix this later
+			}
+			else if( entry.fileAttributes == (char)0x0f || entry.fileName[0] == (char)0xE5 ){
 				continue;
+
 			}else{
-				//display formatting
-				printf("%-12s %7s %12d %6d\n", strcat(entry.fileName, entry.fileExt), "type", entry.fileSize, entry.flc);
+				//space delimit to get rid of padding for file name and concatenate with dot before extension 
+				char* name = strtok(entry.fileName, " ");
+				if(entry.fileExt[0] != ' '){
+					char dot[] = ".";
+					strcat(name, dot);
+				}
+
+				printf("%-13s %7s %12d %6d\n", strcat(name, entry.fileExt), "type", entry.fileSize, entry.flc);
 			}
 
 		}
 
+
 		// if entire sector is read, then keep reading next sector in root directory
-		if(entry.fileName != "")
-		 	rootSector++;
+		if(entry.fileName[0] != (char)0x00 && entry.fileName[0] != (char)0xE5 ){
+		 	numSector++;
+		}
+		else
+			continue;
 		
-	} while (entry.fileName[0] != 0x00 && numSectors < 14);
+	} while (entry.fileName[0] != (char)0x00 && entry.fileName[0] != (char)0xE5 && numSector < 32);
 
 	return 0;
 }

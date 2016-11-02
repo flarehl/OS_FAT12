@@ -15,7 +15,7 @@ bool accessShmem(void **ptr){
 
 	// attach shared mem
 	shPtr = shmat(shmid, NULL, 0);
-	if( (int)shPtr == -1 ){
+	if( (long)shPtr == -1 ){
 		perror("shmat");
 		return FALSE;
 	};
@@ -46,7 +46,7 @@ bool createShmem(void **ptr){
 
 	// attach shared mem
 	shPtr = shmat(shmid, NULL, 0);
-	if( (int)shPtr == -1 ){
+	if( (long)shPtr == -1 ){
 		perror("main shmat");
 		return FALSE;
 	};
