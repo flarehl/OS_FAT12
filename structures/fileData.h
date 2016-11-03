@@ -15,7 +15,8 @@ typedef struct FileData{
 	char lastWriteTime[3];
 	char lastWriteDate[3];
 	short flc; 
-	int fileSize; 
+	int fileSize;
+	 
 } FileData;
 
 

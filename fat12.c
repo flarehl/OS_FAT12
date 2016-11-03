@@ -1,3 +1,17 @@
+/*
+Author: Hanah Leo		
+Class:  CSI-385-01
+Assignment: FAT12 Implementation
+Date Assigned: Start of semester
+Due Date: 11/02/2016
+
+Description: Basic FAT12 implementation and shell handling some custom commands
+Certification of Authenticity:
+I certify that this assignment is entirely my own work.
+*/
+
+
+
 #include <stdio.h>
 #include "./utilities/shmem.h"
 #include "shell.h"
@@ -6,33 +20,35 @@ int main(int argc, char **argv)
 {
 	/* Initialize shared memory segment*/
 	void *shPtr;
-	CurrentPath cPath;
 	char dir[] = "root/";
 
 	createShmem(&shPtr); //passing address of the pointer, int value
 
-	memset(cPath.path, '\0', MAX_PATH);
+	memset(CPATH.path, '\0', MAX_PATH);
 
-	strncpy(cPath.path, dir, 5);
-	cPath.sectorNum = 19;
-	memcpy(shPtr, &cPath, SHMEMSIZE); //should send to cd
+	strncpy(CPATH.path, dir, 5);
+	CPATH.sectorNum = 19;
+	memcpy(shPtr, &CPATH, SHMEMSIZE); //should send to cd
 
 
 	/* Shell */
 	char** args;
 	char* line;
+	int status = 0;
 
-	while( TRUE ) {
+	do {
 
 		line = getInput();
 		args = parseInput(line);
 
-		if( (strncmp(args[0], "exit", 4) == 0) || (strncmp(args[0], "logout", 6) == 0) )
-			break; // use continue to break out of do while loop
+		if( (strncmp(args[0], "exit", 4) == 0) || (strncmp(args[0], "logout", 6) == 0) ){
+			status = 1;
+			continue;
+		}
 
 		executeCmd(args);
 
-	} 
+	} while(status == 0);
 
 
 	detachShmem(shPtr);

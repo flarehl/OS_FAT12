@@ -12,8 +12,8 @@ int main(int argc, char** argv) {
 	}
 
 	char *buffer = (char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
-	FileData entry;
 
+	FileData entry;
 	int offset = 0,
 		numSector = 19;
 
@@ -40,6 +40,7 @@ int main(int argc, char** argv) {
 				continue;
 
 			}else{
+
 				//space delimit to get rid of padding for file name and concatenate with dot before extension 
 				char* name = strtok(entry.fileName, " ");
 				if(entry.fileExt[0] != ' '){
@@ -47,7 +48,18 @@ int main(int argc, char** argv) {
 					strcat(name, dot);
 				}
 
-				printf("%-13s %7s %12d %6d\n", strcat(name, entry.fileExt), "type", entry.fileSize, entry.flc);
+				//wrap into char* getType() later
+				char file[] = "file";
+				char dir[] = "dir";
+
+				char* type;
+				if(isFile(entry))
+					type = file;
+				else
+					type = dir;
+				
+
+				printf("%-13s %7s %12d %6d\n", strcat(name, entry.fileExt), type, entry.fileSize, entry.flc);
 			}
 
 		}
@@ -64,6 +76,7 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
+
 
 
 /******************************************************************************

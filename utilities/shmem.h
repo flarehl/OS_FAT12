@@ -12,6 +12,8 @@
 #define SHMEMSIZE sizeof(CurrentPath)
 #define SHMEMKEY 9685
 
+CurrentPath CPATH;
+
 bool accessShmem(void **ptr);
 bool createShmem(void **ptr); //double pointer because argument passed in is reference to pointer
 bool detachShmem(void *ptr);

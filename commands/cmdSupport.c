@@ -171,6 +171,72 @@ void set_fat_entry(int fat_entry_number, int value, unsigned char* fat)
    }
 }
 
+/******************************************************************************
+* getPhysSector
+*
+* translates logical sector number to physical sector number
+*
+* logicalNum: sector number to be translated
+*
+* Return: physical sector num
+*****************************************************************************/
+int getPhysSector(int logicalNum){
+   return logicalNum + 31;
+}
+
+
+/******************************************************************************
+* isAbsolutePath
+*
+* checks if the argument provided is an absolute path
+*
+* path: first file name
+*
+* Return: true if absolute path
+*****************************************************************************/
+bool isAbsolutePath(char* path){
+   if( strncmp(path, "root", 4) == 0 )
+      return TRUE;
+   else
+      return FALSE;
+}
+
+
+/******************************************************************************
+* isFile
+*
+* checks if file entry is a file or a subdirectory by masking attributes
+* and seeing if 5th bit is on or off
+*
+* entry: file entry to be checked
+*
+* Return: true if entry is a file, return false otherwise
+*****************************************************************************/
+bool isFile(FileData entry){
+
+   if ((entry.fileAttributes & (char)0x10 ) == (char)0x10 )
+      return FALSE; 
+   else
+      return TRUE;
+
+}
+
+/******************************************************************************
+* isRelativePath
+*
+* checks if the argument provided is a relative path
+*
+* path: first file name
+*
+* Return: return true if relative path
+*****************************************************************************/
+bool isRelativePath(char* path){
+   if( strncmp(path, ".", 1) || strncmp(path, "..", 2) )
+      return TRUE; //add isExist()
+   else
+      return FALSE;
+}
+
 
 /******************************************************************************
 * readEntry
@@ -270,7 +336,7 @@ FileData readEntry(char* buffer, int *offset){
 char** parsePath(char* path){
 
    //quotes should be stripped by parseInput already if they were included
-   char slashDelim[] = "\\", *token;
+   char slashDelim[] = "/", *token;
    char** args = (char**)malloc(DEFAULT_BUF_SIZE * sizeof(char));
    int location = 0,
       bufSize = DEFAULT_BUF_SIZE;
@@ -282,6 +348,8 @@ char** parsePath(char* path){
    // loop through until all tokens are handed off to parsedInput
    while(token!= NULL){
 
+      for(int i = 0; i < strlen(token); i++)
+         token[i] = toupper(token[i]);
       args[location] = token;
       location++;
 
@@ -300,5 +368,21 @@ char** parsePath(char* path){
    args[location] = NULL; //set null terminating char for args
       
    return args;
+
+}
+
+
+/******************************************************************************
+* parsePath
+*
+* slash delimits path so filenames can be directly compared
+*
+* path: path argument passed into command
+*
+* Return: slash delimited "argv"
+*****************************************************************************/
+bool searchEntries(char** args){
+   //do stuff here
+   return FALSE;
 
 }
