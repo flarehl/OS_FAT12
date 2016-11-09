@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 
 			entry = readEntry(buffer, &offset);
 
-			if( entry.fileName[0] == (char)0x00 ){
+			if( entry.fileName[0] == (char)0x00 ){ //needs an or with 0xF6
 				break; //fix this later
 			}
 			else if( entry.fileAttributes == (char)0x0f || entry.fileName[0] == (char)0xE5 ){
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
 				//space delimit to get rid of padding for file name and concatenate with dot before extension 
 				char* name = strtok(entry.fileName, " ");
 				if(entry.fileExt[0] != ' '){
-					char dot[] = ".";
+				  char dot[] = "."; //I think you can just put "." in the strcat function.
 					strcat(name, dot);
 				}
 

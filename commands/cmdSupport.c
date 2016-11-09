@@ -222,6 +222,24 @@ bool isFile(FileData entry){
 }
 
 /******************************************************************************
+* isDirectory
+*
+* checks if the input item is a directory or another item
+*
+* entry: directory entry to be checked
+*
+* Return: true if entry is a directory, return false otherwise
+*****************************************************************************/
+
+bool isDirectory(FileData entry){
+    
+    if((entry.fileAttributes & (char)0x10) == (char)0x10)
+        return 1;
+    else
+        return 0;
+}
+
+/******************************************************************************
 * isRelativePath
 *
 * checks if the argument provided is a relative path
@@ -386,3 +404,4 @@ bool searchEntries(char** args){
    return FALSE;
 
 }
+
