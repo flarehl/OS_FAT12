@@ -512,10 +512,6 @@ FileData searchEntries(char* fileName, int sectorNumber){
 *****************************************************************************/
 char* fileTranslate(char* fileName){
 
-<<<<<<< aa4980e8ccb2a254aca2cf5a9e8d2db080f1b7f3
-}
-
-=======
    for(int i = 0; i < strlen(fileName); i++){
       fileName[i] = toupper(fileName[i]);
       if(fileName[i] == '.')
@@ -525,4 +521,3 @@ char* fileTranslate(char* fileName){
    return fileName;
 
 }
->>>>>>> d98f9c6a1de457615654c1db5ea84d964c29b4f9
