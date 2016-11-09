@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
 
 	char *buffer = (char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
 
+	FileData nEntry; //for emptying entry
 	FileData entry;
 	int offset = 0,
 		numSector = 19;
@@ -28,7 +29,6 @@ int main(int argc, char** argv) {
 
 		for(int i = 0; i < 16; i++){ // 16 entries per sector
 
-			FileData nEntry;
 			entry = nEntry; //to reset values, spaghettiiiiiii
 
 			entry = readEntry(buffer, &offset);

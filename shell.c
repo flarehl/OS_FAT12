@@ -40,12 +40,12 @@ void executeCmd(char **args) {
  *
  * Return: the user input
  ****************************************************************************/
-char* getInput(){
+char* getInput(CurrentPath cwd){
 
 	char* userInput = NULL;
 	ssize_t inputSize = 0;
 	
-	printf(">"); //add path before > later
+	printf("%s>", cwd.path); //add path before > later
 	getline(&userInput, &inputSize, stdin);
 
 	return userInput;

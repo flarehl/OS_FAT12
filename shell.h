@@ -15,7 +15,7 @@
 
 void executeCmd(char** args);
 
-char* getInput();
+char* getInput(CurrentPath);
 
 char** parseInput(char*);
 

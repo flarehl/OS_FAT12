@@ -20,13 +20,13 @@ int main(int argc, char **argv)
 {
 	/* Initialize shared memory segment*/
 	void *shPtr;
-	char dir[] = "root/";
+	char dir[] = "ROOT";
 
 	createShmem(&shPtr); //passing address of the pointer, int value
 
 	memset(CPATH.path, '\0', MAX_PATH);
 
-	strncpy(CPATH.path, dir, 5);
+	strncpy(CPATH.path, dir, 4);
 	CPATH.sectorNum = 19;
 	memcpy(shPtr, &CPATH, SHMEMSIZE); //should send to cd
 
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 
 	do {
 
-		line = getInput();
+		line = getInput(CPATH);
 		args = parseInput(line);
 
 		if( (strncmp(args[0], "exit", 4) == 0) || (strncmp(args[0], "logout", 6) == 0) ){
@@ -47,6 +47,8 @@ int main(int argc, char **argv)
 		}
 
 		executeCmd(args);
+
+		memcpy(&CPATH, shPtr, SHMEMSIZE); //read in shared memory for updates, need in main?
 
 	} while(status == 0);
 

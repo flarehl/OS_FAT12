@@ -257,6 +257,53 @@ bool isRelativePath(char* path){
 
 
 /******************************************************************************
+* parsePath
+*
+* slash delimits path so filenames can be directly compared
+*
+* path: path argument passed into command
+*
+* Return: slash delimited "argv"
+*****************************************************************************/
+char** parsePath(char* path){
+
+   //quotes should be stripped by parseInput already if they were included
+   char slashDelim[] = "/", *token;
+   char** args = (char**)malloc(DEFAULT_BUF_SIZE * sizeof(char));
+   int location = 0,
+      bufSize = DEFAULT_BUF_SIZE;
+
+   token = strtok(path, slashDelim);
+   if( token == NULL )
+      printf("Error slash delimiting\n");
+
+   // loop through until all tokens are handed off to parsedInput
+   while(token!= NULL){
+
+      for(int i = 0; i < strlen(token); i++)
+         token[i] = toupper(token[i]);
+      args[location] = token;
+      location++;
+
+      // if the buffer is too small, reallocate space in 50byte increments
+      if(location >= bufSize){
+
+         bufSize += DEFAULT_BUF_SIZE;
+         args = (char**)realloc(args, bufSize * sizeof(char*));
+
+         //maybe add error handling for reallocation of parsedInput
+      }
+
+      token = strtok(NULL, slashDelim);
+   }
+
+   args[location] = NULL; //set null terminating char for args
+      
+   return args;
+
+}
+
+/******************************************************************************
 * readEntry
 *
 * reads and sets entry attributes
@@ -342,66 +389,140 @@ FileData readEntry(char* buffer, int *offset){
    return entry;
 }
 
+
+
 /******************************************************************************
-* parsePath
+* readFAT12Table
 *
-* slash delimits path so filenames can be directly compared
+* Reads the FAT12 tables 
 *
-* path: path argument passed into command
+* sectorNumber:  The number of the FAT entry
 *
-* Return: slash delimited "argv"
+* return: returns buffer holding fat entries
 *****************************************************************************/
-char** parsePath(char* path){
+unsigned char* readFAT12Table(int FAT_Number) {
 
-   //quotes should be stripped by parseInput already if they were included
-   char slashDelim[] = "/", *token;
-   char** args = (char**)malloc(DEFAULT_BUF_SIZE * sizeof(char));
-   int location = 0,
-      bufSize = DEFAULT_BUF_SIZE;
+   unsigned char* fat = (unsigned char*)malloc( 9 * BYTES_PER_SECTOR * sizeof(unsigned char) );
 
-   token = strtok(path, slashDelim);
-   if( token == NULL )
-      printf("Error slash delimiting\n");
+   FILE_SYSTEM_ID = fopen("./floppies/floppy1", "r+");
 
-   // loop through until all tokens are handed off to parsedInput
-   while(token!= NULL){
-
-      for(int i = 0; i < strlen(token); i++)
-         token[i] = toupper(token[i]);
-      args[location] = token;
-      location++;
-
-      // if the buffer is too small, reallocate space in 50byte increments
-      if(location >= bufSize){
-
-         bufSize += DEFAULT_BUF_SIZE;
-         args = (char**)realloc(args, bufSize * sizeof(char*));
-
-         //maybe add error handling for reallocation of parsedInput
-      }
-
-      token = strtok(NULL, slashDelim);
+   if (FILE_SYSTEM_ID == NULL)
+   {
+      printf("Could not open the floppy drive or image.\n");
+      exit(1);
    }
 
-   args[location] = NULL; //set null terminating char for args
-      
-   return args;
+   // i is 0-numSectors, fat holds the data
+   if (FAT_Number == 1) {
+      for (int i = 0; i < 9; i++) 
+         read_sector(i + 1, &fat[i * BYTES_PER_SECTOR]);
+      return fat;
+   }
+   else if (FAT_Number == 2) {
+      for (int i = 10; i < 19; i++)
+         read_sector(i + 1, &fat[i * BYTES_PER_SECTOR]);
+      return fat;
+   }
+   else
+      printf("%s\n", "Error: invalid FAT table number");
+   
 
 }
 
 
 /******************************************************************************
-* parsePath
+* searchEntries
 *
-* slash delimits path so filenames can be directly compared
+* searches for the entry
 *
-* path: path argument passed into command
+* fileName: the file name to be searched for
+* sectorNumber: number of the current sector to be read
 *
-* Return: slash delimited "argv"
+* Return: if entry does not exist, returns FileData object with blank 
+*         file name
 *****************************************************************************/
-bool searchEntries(char** args){
-   //do stuff here
-   return FALSE;
+FileData searchEntries(char* fileName, int sectorNumber){
+
+   FileData nEntry; //used as empty value
+   FileData entry;
+   int offset = 0;
+
+   FILE_SYSTEM_ID = fopen("./floppies/floppy1", "r+");
+   if (FILE_SYSTEM_ID == NULL) {
+      printf("Could not open the floppy drive or image.\n");
+      exit(1);
+   }
+
+   //read in the appropriate sector set by sectorNumber
+   char *buffer = (char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
+   if (read_sector(sectorNumber, buffer) == -1) {
+      printf("Something has gone wrong -- could not read the boot sector\n");
+      exit(1);
+   }
+
+   fileName = fileTranslate(fileName);
+
+
+   /*put in do while loop to deal with directories spanning multiple sectors*/
+
+      for(int i = 0; i < 16; i++){ // 16 entries per sector
+
+         entry = nEntry; //to reset values, spaghettiiiiiii
+
+         entry = readEntry(buffer, &offset);
+
+         if( entry.fileName[0] == (char)0x00 ){
+            break; //if empty, break
+         }
+         else if( entry.fileAttributes == (char)0x0f || entry.fileName[0] == (char)0xE5 ){
+            continue;
+
+         }else{
+
+            char* name = strtok(entry.fileName, " ");
+            if(entry.fileExt[0] != ' '){
+               char space[] = " ";
+               strcat(name, space);
+               strcat(name, entry.fileExt);
+            }
+            //translate filename if theres a dot
+
+            if( strncmp(name, fileName, strlen(fileName)) == 0 )
+               return entry; 
+
+         }
+
+      }
+
+   entry.fileName[0] = '.';
+   return entry;
 
 }
 
+
+/******************************************************************************
+* fileTranslate
+*
+* translates given filename to all caps and replaces any dots with spaces
+*
+* fileName: the file name to be translated
+*
+* Return: if entry does not exist, returns FileData object with blank 
+*         file name
+*****************************************************************************/
+char* fileTranslate(char* fileName){
+
+<<<<<<< aa4980e8ccb2a254aca2cf5a9e8d2db080f1b7f3
+}
+
+=======
+   for(int i = 0; i < strlen(fileName); i++){
+      fileName[i] = toupper(fileName[i]);
+      if(fileName[i] == '.')
+         fileName[i] = ' '; //replace dots with spaces
+   }
+
+   return fileName;
+
+}
+>>>>>>> d98f9c6a1de457615654c1db5ea84d964c29b4f9

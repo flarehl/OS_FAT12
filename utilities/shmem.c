@@ -33,7 +33,6 @@ bool accessShmem(void **ptr){
 
 bool createShmem(void **ptr){
 
-	// SHARED MEMORY INITIALIZATION FOR PATH VARIABLE IN CD *
 	int shmid; //need to initialize?
 	char *shPtr;
 
