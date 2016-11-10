@@ -7,6 +7,7 @@ int main(int argc, char **argv)
     char rDir[] = "root/";
     char **parsedPath;
     unsigned char *fat;
+    unsigned char *directory;
     int fatEntryNumber;
     
     accessShmem(&shPtr); //accessing shared memeory struct
@@ -30,10 +31,27 @@ int main(int argc, char **argv)
     
     
     fat = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char*));
-    if(sector_open(1, fat) == -1)
+    if(sector_open(1, fat) == -1) //opening the first fat directory
     {
-        printf("There was a problem opening the fat.");
+        printf("There was a problem opening the fat.\n");
         exit(-1);
+    }
+    
+    directory = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char*));
+    if(sector_open(CPATH.sectorNum, directory) == -1); //opening the user's current directory
+    {
+        printf("There was a problem opening your directory.\n");
+        exit(-1);
+    }
+    
+    if(itemExists(argv[1], directory) == TRUE)
+    {
+        
+    }
+    else
+    {
+        printf("The file you entered doesn't exist.");
+        exit(0);
     }
     
     return 0;

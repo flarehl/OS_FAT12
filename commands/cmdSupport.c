@@ -234,9 +234,9 @@ bool isFile(FileData entry){
 bool isDirectory(FileData entry){
     
     if((entry.fileAttributes & (char)0x10) == (char)0x10)
-        return 1;
+        return TRUE;
     else
-        return 0;
+        return FALSE;
 }
 
 /******************************************************************************
@@ -520,4 +520,85 @@ char* fileTranslate(char* fileName){
 
    return fileName;
 
+}
+
+/******************************************************************************
+* itemExists
+*
+* compare's user input with the current sector to find if a file or directory
+* exists
+*
+* itemName: the name of the file or directory that is being searched for
+*
+* directory: the current sector of the directory being searched
+*  
+* Return: a bool that states true if the file or direcotry exists and false
+* if it does not.
+*****************************************************************************/
+
+int itemExists(char *itemName, unsigned char *directory)
+{
+    char currentItemName[12];
+    char *holder;
+    int currentOffset = 0x00;
+    bool fileExists = FALSE;
+    int i, j;
+    int currentItemNameSize; //needed to keep track of the actaul size of the
+        //item being checked
+    
+
+    for(i = 0; i < 16; i++)
+    {
+        if(fileExists == FALSE)
+        {
+            for(j = 0; j < 8; j++) //This loop gets the file name
+            {
+               holder = directory[currentOffset +j];
+                if(holder == 0x20) //This should jump over any whitespace
+                {
+                 continue;
+                }
+                else
+                {
+                   currentItemName[currentItemNameSize] = holder;
+                   currentItemNameSize++;
+                }
+            }
+            //do we need to put a dot insert here?
+            for(j = 0; j < 3; j++) //this loop gets the extention
+            {
+                holder = directory[currentOffset + 8 + j];
+            
+                if(holder == 0x20)
+                {
+                    continue;
+                }
+                else
+                {
+                    currentItemName[currentItemNameSize] = holder;
+                    currentItemNameSize++;
+                }
+            }
+            
+            if(currentItemName == itemName)
+            {
+                fileExists = TRUE;
+            }
+            else
+            {
+                currentOffset = currentOffset + 0x20;
+            }
+        }
+        
+    }
+    
+    if(fileExists == FALSE)
+    {
+        return -1;
+    }
+    else
+    {
+        return currentOffset; //this will pass back the postion the file is at, or
+        //-1 if the file doesn't exist at all
+    }
 }

@@ -29,6 +29,7 @@ int write_sector(int sector_number, unsigned char* buffer);
 int            getPhysSector(int);
 bool           isAbsolutePath(char*);
 bool           isFile(FileData);
+bool           isDirectory(FileData);
 bool           isRelativePath(char*);
 char**         parsePath(char*);
 FileData       readEntry(char*, int*);
