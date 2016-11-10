@@ -5,7 +5,13 @@ bool isLongFile(FileData);
 
 int main(int argc, char** argv) {
 
-	FILE_SYSTEM_ID = fopen("./floppies/floppy1", "r+");
+	void *shPtr;
+
+	accessShmem(&shPtr); //passing address of the pointer, int value
+	memset(CPATH.path, '\0', MAX_PATH);
+	memcpy(&CPATH, shPtr, SHMEMSIZE); //read in from shared memory
+
+	FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
 	if (FILE_SYSTEM_ID == NULL) {
 		printf("Could not open the floppy drive or image.\n");
 		exit(1);
@@ -16,9 +22,15 @@ int main(int argc, char** argv) {
 	FileData nEntry; //for emptying entry
 	FileData entry;
 	int offset = 0,
-		numSector = 19;
+		numSector = CPATH.sectorNum;
+
+	//if cwd is not root, translate logical sector number
+	if(strcmp(CPATH.path,"ROOT") != 0)
+		numSector += 31;
+
 
 	printf("%-13s %7s %12s %6s\n", "File Name", "Type", "File Size", "FLC");
+	printf("---------------------------------------------\n");
 
 	do { //for reading in entries from struct
 
@@ -33,7 +45,7 @@ int main(int argc, char** argv) {
 
 			entry = readEntry(buffer, &offset);
 
-			if( entry.fileName[0] == (char)0x00 ){ //needs an or with 0xF6
+			if( entry.fileName[0] == (char)0x00 || entry.fileName[0] == (char)0xf6){ //needs an or with 0xF6
 				break; //fix this later
 			}
 			else if( entry.fileAttributes == (char)0x0f || entry.fileName[0] == (char)0xE5 ){
@@ -44,7 +56,7 @@ int main(int argc, char** argv) {
 				//space delimit to get rid of padding for file name and concatenate with dot before extension 
 				char* name = strtok(entry.fileName, " ");
 				if(entry.fileExt[0] != ' '){
-				  char dot[] = "."; //I think you can just put "." in the strcat function.
+				 	char dot[] = "."; //I think you can just put "." in the strcat function.
 					strcat(name, dot);
 				}
 
@@ -69,32 +81,15 @@ int main(int argc, char** argv) {
 		if(entry.fileName[0] != (char)0x00 && entry.fileName[0] != (char)0xE5 ){
 		 	numSector++;
 		}
-		else
-			continue;
 		
-	} while (entry.fileName[0] != (char)0x00 && entry.fileName[0] != (char)0xE5 && numSector < 32);
+		offset = 0;
+
+	} while (entry.fileName[0] != (char)0x00 && numSector < 32);
 
 	return 0;
 }
 
 
 
-/******************************************************************************
-* isLongFile
-*
-* Checks if file entry needs to be ignored
-*
-* entry:  file entry with name to be checked
-*
-* Return: true if file entry should be ignored
-*****************************************************************************/
-bool isLongFile(FileData entry){
-
-	if(entry.fileAttributes == 0x0f)
-		return TRUE;
-	else 
-		return FALSE;
-
-}
 
 

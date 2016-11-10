@@ -29,6 +29,7 @@ int write_sector(int sector_number, unsigned char* buffer);
 int            getPhysSector(int);
 bool           isAbsolutePath(char*);
 bool           isFile(FileData);
+bool           isLongFile(FileData);
 bool           isRelativePath(char*);
 char**         parsePath(char*);
 FileData       readEntry(char*, int*);
@@ -40,7 +41,6 @@ char*          fileTranslate(char*);
 //arguments are char* for filenames, not Entry
 
 bool isDeleted(char*)
-bool isLongFile(char*)
 bool isEmpty(char*)
 */
 

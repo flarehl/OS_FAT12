@@ -221,23 +221,25 @@ bool isFile(FileData entry){
 
 }
 
-/******************************************************************************
-* isDirectory
-*
-* checks if the input item is a directory or another item
-*
-* entry: directory entry to be checked
-*
-* Return: true if entry is a directory, return false otherwise
-*****************************************************************************/
 
-bool isDirectory(FileData entry){
-    
-    if((entry.fileAttributes & (char)0x10) == (char)0x10)
-        return 1;
-    else
-        return 0;
+/******************************************************************************
+* isLongFile
+*
+* Checks if file entry needs to be ignored
+*
+* entry:  file entry with name to be checked
+*
+* Return: true if file entry should be ignored
+*****************************************************************************/
+bool isLongFile(FileData entry){
+
+   if(entry.fileAttributes == 0x0f)
+      return TRUE;
+   else 
+      return FALSE;
+
 }
+
 
 /******************************************************************************
 * isRelativePath
@@ -404,7 +406,7 @@ unsigned char* readFAT12Table(int FAT_Number) {
 
    unsigned char* fat = (unsigned char*)malloc( 9 * BYTES_PER_SECTOR * sizeof(unsigned char) );
 
-   FILE_SYSTEM_ID = fopen("./floppies/floppy1", "r+");
+   FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
 
    if (FILE_SYSTEM_ID == NULL)
    {
@@ -447,7 +449,7 @@ FileData searchEntries(char* fileName, int sectorNumber){
    FileData entry;
    int offset = 0;
 
-   FILE_SYSTEM_ID = fopen("./floppies/floppy1", "r+");
+   FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
    if (FILE_SYSTEM_ID == NULL) {
       printf("Could not open the floppy drive or image.\n");
       exit(1);
@@ -470,6 +472,7 @@ FileData searchEntries(char* fileName, int sectorNumber){
          entry = nEntry; //to reset values, spaghettiiiiiii
 
          entry = readEntry(buffer, &offset);
+
 
          if( entry.fileName[0] == (char)0x00 ){
             break; //if empty, break
@@ -494,7 +497,7 @@ FileData searchEntries(char* fileName, int sectorNumber){
 
       }
 
-   entry.fileName[0] = '.';
+   entry = nEntry;
    return entry;
 
 }
