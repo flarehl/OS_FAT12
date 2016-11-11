@@ -171,6 +171,18 @@ void set_fat_entry(int fat_entry_number, int value, unsigned char* fat)
    }
 }
 
+
+
+
+
+
+
+
+/* Additional Functions by HL, SB */
+
+
+
+
 /******************************************************************************
 * getPhysSector
 *
@@ -199,6 +211,42 @@ bool isAbsolutePath(char* path){
       return TRUE;
    else
       return FALSE;
+}
+
+/******************************************************************************
+* isDeleted
+*
+* checks if file entry is deleted
+*
+* entry: file entry to be checked
+*
+* Return: true if the entry has been deleted, return false otherwise
+*****************************************************************************/
+bool isDeleted(FileData entry){
+
+   if(entry.fileName[0] == (char)0xE5)
+      return TRUE;
+   else
+      return FALSE;
+
+}
+
+/******************************************************************************
+* isEmpty
+*
+* checks if file entry is empty 
+*
+* entry: file entry to be checked
+*
+* Return: true if entry is not empty, return false otherwise
+*****************************************************************************/
+bool isEmpty(FileData entry){
+
+   if (entry.fileName[0] == (char)0x00 )
+      return TRUE; 
+   else
+      return FALSE;
+
 }
 
 
@@ -249,7 +297,7 @@ bool isLongFile(FileData entry){
 * Return: return true if relative path
 *****************************************************************************/
 bool isRelativePath(char* path){
-   if( strncmp(path, ".", 1) || strncmp(path, "..", 2) )
+   if( strncmp(path, "./", 2) || strncmp(path, "../", 3) )
       return TRUE; //add isExist()
    else
       return FALSE;

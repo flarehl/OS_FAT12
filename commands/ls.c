@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
 
 	//if cwd is not root, translate logical sector number
 	if(strcmp(CPATH.path,"ROOT") != 0)
-		numSector += 31;
+		numSector = getPhysSector(numSector);
 
 
 	printf("%-13s %7s %12s %6s\n", "File Name", "Type", "File Size", "FLC");
@@ -53,10 +53,16 @@ int main(int argc, char** argv) {
 
 			}else{
 
+				/* HANDLE THE RELATIVE AND ABSOLUTE */
+
+
+
+
+
 				//space delimit to get rid of padding for file name and concatenate with dot before extension 
 				char* name = strtok(entry.fileName, " ");
 				if(entry.fileExt[0] != ' '){
-				 	char dot[] = "."; //I think you can just put "." in the strcat function.
+				 	char dot[] = "."; //strcat doesnt play well with 
 					strcat(name, dot);
 				}
 
