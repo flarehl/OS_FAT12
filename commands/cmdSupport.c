@@ -285,6 +285,7 @@ bool isLongFile(FileData entry){
       return TRUE;
    else 
       return FALSE;
+}
 
 
 /******************************************************************************
@@ -571,6 +572,7 @@ char* fileTranslate(char* fileName){
 
 }
 
+
 /******************************************************************************
 * itemExists
 *
@@ -578,13 +580,11 @@ char* fileTranslate(char* fileName){
 * exists
 *
 * itemName: the name of the file or directory that is being searched for
-*
 * directory: the current sector of the directory being searched
 *  
 * Return: a bool that states true if the file or direcotry exists and false
 * if it does not.
 *****************************************************************************/
-
 int itemExists(char *itemName, unsigned char *directory)
 {
     char currentItemName[12];
@@ -603,7 +603,7 @@ int itemExists(char *itemName, unsigned char *directory)
             for(j = 0; j < 8; j++) //This loop gets the file name
             {
                holder = directory[currentOffset +j];
-                if(holder == 0x20) //This should jump over any whitespace
+                if(holder == (char)0x20) //This should jump over any whitespace
                 {
                  continue;
                 }
@@ -618,7 +618,7 @@ int itemExists(char *itemName, unsigned char *directory)
             {
                 holder = directory[currentOffset + 8 + j];
             
-                if(holder == 0x20)
+                if(holder == (char)0x20)
                 {
                     continue;
                 }
@@ -650,4 +650,5 @@ int itemExists(char *itemName, unsigned char *directory)
         return currentOffset; //this will pass back the postion the file is at, or
         //-1 if the file doesn't exist at all
     }
+ 
 }

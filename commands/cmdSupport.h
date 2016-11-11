@@ -33,6 +33,7 @@ bool           isEmpty(FileData);
 bool           isFile(FileData);
 bool           isLongFile(FileData);
 bool           isRelativePath(char*);
+int            itemExists(char*, unsigned char*);
 char**         parsePath(char*);
 FileData       readEntry(char*, int*);
 unsigned char* readFAT12Table(int FAT_Number);
