@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     
     memcpy(&CPATH, shPtr, SHMEMSIZE) //sets the path int
     
-    FILE_SYSTEM_ID = fopen("./floppies/floppy1", "r+"); //the variable is in cmdSupport.h
+    FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+"); //the variable is in cmdSupport.h
     if(argc < 2)//check if there is the right number of items.
     {
         printf("Too few arguments for this command.\n");

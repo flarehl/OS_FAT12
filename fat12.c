@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
 	strncpy(CPATH.path, dir, 4);
 	CPATH.sectorNum = 19;
-	memcpy(shPtr, &CPATH, SHMEMSIZE); //should send to cd
+	memcpy(shPtr, &CPATH, SHMEMSIZE); //sets shared memory variables
 
 
 	/* Shell */

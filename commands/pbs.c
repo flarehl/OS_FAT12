@@ -61,7 +61,7 @@ int readBootSector() {
 	unsigned char* buffer;
 	int mostSignificantBits, leastSignificantBits;
 
-	FILE_SYSTEM_ID = fopen("./floppies/floppy1", "r+");
+	FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
 
 	if (FILE_SYSTEM_ID == NULL)
 	{

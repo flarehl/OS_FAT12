@@ -13,15 +13,19 @@ int main(int argc, char** argv) {
 	char slash[] = "/";
 
 	accessShmem(&shPtr); //passing address of the pointer, int value
-
 	memset(CPATH.path, '\0', MAX_PATH);
 	memcpy(&CPATH, shPtr, SHMEMSIZE); //read in from shared memory
 
-	FILE_SYSTEM_ID = fopen("./floppies/floppy1", "r+");
+	FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
 	if (FILE_SYSTEM_ID == NULL) {
 		printf("Could not open the floppy drive or image.\n");
 		exit(1);
 	}
+
+	//if cwd is not root, translate logical sector number
+	int numSector = CPATH.sectorNum;
+	if(strcmp(CPATH.path,"ROOT") != 0)
+		numSector += 31;
 
 	if(argc == 1){ 
 		memset(CPATH.path, '\0', sizeof(CPATH.path));
@@ -34,11 +38,11 @@ int main(int argc, char** argv) {
 	else if(argc == 2){
 
 		FileData entry;
+		CurrentPath tmp;
 
-		//handle . and ..
-		entry = searchEntries(argv[1], CPATH.sectorNum);
+		entry = searchEntries(argv[1], numSector);
 
-		if(entry.fileName[0] != '.'){
+		if(strcmp(entry.fileName, "        ") != 0){
 
 			if( !isFile(entry) ){
 
