@@ -7,8 +7,9 @@ int main(int argc, char **argv)
     char rDir[] = "root/";
     char **parsedPath;
     unsigned char *fat;
-    unsigned char *directory;
-    int fatEntryNumber;
+    FileData directory;
+    int currentSectorNum;
+    unsigned int fatEntryNumber;
     
     accessShmem(&shPtr); //accessing shared memeory struct
     
@@ -30,22 +31,26 @@ int main(int argc, char **argv)
     }
     
     
-    fat = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char*));
-    if(sector_open(1, fat) == -1) //opening the first fat directory
-    {
-        printf("There was a problem opening the fat.\n");
-        exit(-1);
-    }
+    fat = readFAT12Table(1);
     
-    directory = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char*));
+    /*directory = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char*));
     if(sector_open(CPATH.sectorNum, directory) == -1); //opening the user's current directory
     {
         printf("There was a problem opening your directory.\n");
         exit(-1);
     }
+    */
     
-    if(itemExists(argv[1], directory) == TRUE)
+    directory = searchEntries(argv[1], CPATH.sectorNum);
+    
+    if(directory.fileName[0] == " ")
     {
+        fatEntryNumber = get_fat_entry(directory.flc, fat);
+        if(fatEntryNumber != 0xFF)
+        {
+            currentSectorNum 
+            
+        }
         
     }
     else

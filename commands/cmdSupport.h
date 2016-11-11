@@ -36,6 +36,7 @@ FileData       readEntry(char*, int*);
 unsigned char* readFAT12Table(int FAT_Number);
 FileData       searchEntries(char*, int);
 char*          fileTranslate(char*);
+int            itemExists(char *itemName, unsigned char *directory);
 
 /*
 //arguments are char* for filenames, not Entry
