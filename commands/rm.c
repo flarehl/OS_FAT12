@@ -10,6 +10,7 @@ int main(int argc, char **argv)
     FileData directory;
     int currentSectorNum;
     unsigned int fatEntryNumber;
+    int offset;
     
     accessShmem(&shPtr); //accessing shared memeory struct
     
@@ -30,28 +31,41 @@ int main(int argc, char **argv)
         exit(-1);
     }
     
+    parsedPath = fileTranslate(argv[1]);
     
     fat = readFAT12Table(1);
     
-    /*directory = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char*));
+    directory = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char*));
     if(sector_open(CPATH.sectorNum, directory) == -1); //opening the user's current directory
     {
         printf("There was a problem opening your directory.\n");
         exit(-1);
     }
-    */
     
-    directory = searchEntries(argv[1], CPATH.sectorNum);
     
-    if(directory.fileName[0] == " ")
+    directory = searchEntries(parsedPath, CPATH.sectorNum);
+    //currently only reads the first sector of a folder, which will work, but
+    //its really not complete for the program
+    
+    if(directory.fileName[0] != " ")
     {
-        fatEntryNumber = get_fat_entry(directory.flc, fat);
-        if(fatEntryNumber != 0xFF)
+        fatEntryNumber = get_fat_entry(directory.flc, fat); //clearing out the fat table
+        while(fatEntryNumber != 0xFFF)
         {
-            currentSectorNum 
-            
+            set_fat_entry(fatEntryNumber, 0x000, fat);
+            currentSectorNum = fatEntryNumber;
+            fatEntryNumber = get_fat_entry(currentSectorNum, fat);
+        }
+        set_fat_entry(fatEntryNumber, 0x000, fat);
+        
+        offset = itemExists(parsedPath, directory); //gets the actaul offset of
+        //the location
+        if(offset == -1)
+        {
+            printf("rm had problems opening the directory entry.");
         }
         
+        directory[offset] = 0xE5;
     }
     else
     {
