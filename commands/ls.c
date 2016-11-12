@@ -11,12 +11,12 @@ int main(int argc, char** argv) {
 	memset(CPATH.path, '\0', MAX_PATH);
 	memcpy(&CPATH, shPtr, SHMEMSIZE); //read in from shared memory
 
+
 	FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
 	if (FILE_SYSTEM_ID == NULL) {
-		printf("Could not open the floppy drive or image.\n");
-		exit(1);
+	  printf("Could not open the floppy drive or image.\n");
+	  exit(1);
 	}
-
 	char *buffer = (char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
 
 	FileData nEntry; //for emptying entry
@@ -53,10 +53,12 @@ int main(int argc, char** argv) {
 
 			}else{
 
+				/* HANDLE THE RELATIVE AND ABSOLUTE */
+
 				//space delimit to get rid of padding for file name and concatenate with dot before extension 
 				char* name = strtok(entry.fileName, " ");
 				if(entry.fileExt[0] != ' '){
-				 	char dot[] = "."; //I think you can just put "." in the strcat function.
+				 	char dot[] = "."; //strcat doesnt play well with 
 					strcat(name, dot);
 				}
 

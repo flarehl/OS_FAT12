@@ -16,12 +16,6 @@ int main(int argc, char** argv) {
 	memset(CPATH.path, '\0', MAX_PATH);
 	memcpy(&CPATH, shPtr, SHMEMSIZE); //read in from shared memory
 
-	FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
-	if (FILE_SYSTEM_ID == NULL) {
-		printf("Could not open the floppy drive or image.\n");
-		exit(1);
-	}
-
 	//if cwd is not root, translate logical sector number
 	int numSector = CPATH.sectorNum;
 	if(strcmp(CPATH.path,"ROOT") != 0)
@@ -31,7 +25,7 @@ int main(int argc, char** argv) {
 		memset(CPATH.path, '\0', sizeof(CPATH.path));
 		strncpy(CPATH.path, rDir, 4);		
 		CPATH.sectorNum = 19;
-		memcpy(shPtr, &CPATH, SHMEMSIZE); //should send to cd
+		memcpy(shPtr, &CPATH, SHMEMSIZE); 
 		return 0;
 
 	}

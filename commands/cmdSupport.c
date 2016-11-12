@@ -171,6 +171,18 @@ void set_fat_entry(int fat_entry_number, int value, unsigned char* fat)
    }
 }
 
+
+
+
+
+
+
+
+/* Additional Functions by HL, SB */
+
+
+
+
 /******************************************************************************
 * getPhysSector
 *
@@ -199,6 +211,42 @@ bool isAbsolutePath(char* path){
       return TRUE;
    else
       return FALSE;
+}
+
+/******************************************************************************
+* isDeleted
+*
+* checks if file entry is deleted
+*
+* entry: file entry to be checked
+*
+* Return: true if the entry has been deleted, return false otherwise
+*****************************************************************************/
+bool isDeleted(FileData entry){
+
+   if(entry.fileName[0] == (char)0xE5)
+      return TRUE;
+   else
+      return FALSE;
+
+}
+
+/******************************************************************************
+* isEmpty
+*
+* checks if file entry is empty 
+*
+* entry: file entry to be checked
+*
+* Return: true if entry is not empty, return false otherwise
+*****************************************************************************/
+bool isEmpty(FileData entry){
+
+   if (entry.fileName[0] == (char)0x00 )
+      return TRUE; 
+   else
+      return FALSE;
+
 }
 
 
@@ -237,6 +285,7 @@ bool isLongFile(FileData entry){
       return TRUE;
    else 
       return FALSE;
+}
 
 
 /******************************************************************************
@@ -249,7 +298,7 @@ bool isLongFile(FileData entry){
 * Return: return true if relative path
 *****************************************************************************/
 bool isRelativePath(char* path){
-   if( strncmp(path, ".", 1) || strncmp(path, "..", 2) )
+   if( strncmp(path, "./", 2) || strncmp(path, "../", 3) )
       return TRUE; //add isExist()
    else
       return FALSE;
@@ -523,6 +572,7 @@ char* fileTranslate(char* fileName){
 
 }
 
+
 /******************************************************************************
 * itemExists
 *
@@ -530,13 +580,11 @@ char* fileTranslate(char* fileName){
 * exists
 *
 * itemName: the name of the file or directory that is being searched for
-*
 * directory: the current sector of the directory being searched
 *  
 * Return: a bool that states true if the file or direcotry exists and false
 * if it does not.
 *****************************************************************************/
-
 int itemExists(char *itemName, unsigned char *directory)
 {
     char currentItemName[12];
@@ -555,7 +603,7 @@ int itemExists(char *itemName, unsigned char *directory)
             for(j = 0; j < 8; j++) //This loop gets the file name
             {
                holder = directory[currentOffset +j];
-                if(holder == 0x20) //This should jump over any whitespace
+                if(holder == (char)0x20) //This should jump over any whitespace
                 {
                  continue;
                 }
@@ -570,7 +618,7 @@ int itemExists(char *itemName, unsigned char *directory)
             {
                 holder = directory[currentOffset + 8 + j];
             
-                if(holder == 0x20)
+                if(holder == (char)0x20)
                 {
                     continue;
                 }
@@ -602,4 +650,5 @@ int itemExists(char *itemName, unsigned char *directory)
         return currentOffset; //this will pass back the postion the file is at, or
         //-1 if the file doesn't exist at all
     }
+ 
 }

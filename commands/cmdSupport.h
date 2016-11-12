@@ -28,9 +28,12 @@ int write_sector(int sector_number, unsigned char* buffer);
 /*Functions added by HLeo */
 int            getPhysSector(int);
 bool           isAbsolutePath(char*);
+bool           isDeleted(FileData);
+bool           isEmpty(FileData);
 bool           isFile(FileData);
 bool           isLongFile(FileData);
 bool           isRelativePath(char*);
+int            itemExists(char*, unsigned char*);
 char**         parsePath(char*);
 FileData       readEntry(char*, int*);
 unsigned char* readFAT12Table(int FAT_Number);
@@ -38,12 +41,9 @@ FileData       searchEntries(char*, int);
 char*          fileTranslate(char*);
 int            itemExists(char *itemName, unsigned char *directory);
 
-/*
+
 //arguments are char* for filenames, not Entry
 
-bool isDeleted(char*)
-bool isEmpty(char*)
-*/
 
 
 #endif
