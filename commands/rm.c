@@ -5,9 +5,9 @@ int main(int argc, char **argv)
 {
     void *shPtr;
     char rDir[] = "root/";
-    char **parsedPath;
-    unsigned char *fat;
-    FileData directory;
+    char *parsedPath;
+    unsigned char *fat, *directory;
+    FileData directorySector;
     int currentSectorNum;
     unsigned int fatEntryNumber;
     int offset;
@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     memset(CPATH.path, '\0', MAX_PATH); //CPATH is in shmem.h and MAX_PATH is in cwd.h
     //this sets the name of the path
     
-    memcpy(&CPATH, shPtr, SHMEMSIZE) //sets the path int
+    memcpy(&CPATH, shPtr, SHMEMSIZE); //sets the path int
     
     FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+"); //the variable is in cmdSupport.h
     if(argc < 2)//check if there is the right number of items.
@@ -36,20 +36,20 @@ int main(int argc, char **argv)
     fat = readFAT12Table(1);
     
     directory = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char*));
-    if(sector_open(CPATH.sectorNum, directory) == -1); //opening the user's current directory
+    if(read_sector(CPATH.sectorNum, directory) == -1); //opening the user's current directory
     {
         printf("There was a problem opening your directory.\n");
         exit(-1);
     }
     
     
-    directory = searchEntries(parsedPath, CPATH.sectorNum);
+    directorySector = searchEntries(parsedPath, CPATH.sectorNum);
     //currently only reads the first sector of a folder, which will work, but
     //its really not complete for the program
     
-    if(directory.fileName[0] != " ")
+    if(directorySector.fileName[0] != 0x00)
     {
-        fatEntryNumber = get_fat_entry(directory.flc, fat); //clearing out the fat table
+        fatEntryNumber = get_fat_entry(directorySector.flc, fat); //clearing out the fat table
         while(fatEntryNumber != 0xFFF)
         {
             set_fat_entry(fatEntryNumber, 0x000, fat);

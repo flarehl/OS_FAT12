@@ -588,7 +588,7 @@ char* fileTranslate(char* fileName){
 int itemExists(char *itemName, unsigned char *directory)
 {
     char currentItemName[12];
-    char *holder;
+    char holder;
     int currentOffset = 0x00;
     bool fileExists = FALSE;
     int i, j;
@@ -602,7 +602,7 @@ int itemExists(char *itemName, unsigned char *directory)
         {
             for(j = 0; j < 8; j++) //This loop gets the file name
             {
-               holder = directory[currentOffset +j];
+               holder = (char ) directory[currentOffset +j];
                 if(holder == (char)0x20) //This should jump over any whitespace
                 {
                  continue;
@@ -618,7 +618,7 @@ int itemExists(char *itemName, unsigned char *directory)
             {
                 holder = directory[currentOffset + 8 + j];
             
-                if(holder == (char)0x20)
+                if(holder == (char *)0x20)
                 {
                     continue;
                 }
