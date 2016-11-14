@@ -66,6 +66,7 @@ int main(int argc, char **argv)
         }
         
         directory[offset] = 0xE5;
+        write_sector(CPATH.path, directory);
     }
     else
     {
