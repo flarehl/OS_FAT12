@@ -35,9 +35,9 @@ bool           isLongFile(FileData);
 bool           isRelativePath(char*);
 int            itemExists(char*, unsigned char*);
 char**         parsePath(char*);
-FileData       readEntry(char*, int*);
+FileData*      readEntry(char*, int*);
 unsigned char* readFAT12Table(int FAT_Number);
-FileData       searchEntries(char*, int);
+FileData*      searchEntries(char*, int);
 char*          fileTranslate(char*);
 int            itemExists(char *itemName, unsigned char *directory);
 

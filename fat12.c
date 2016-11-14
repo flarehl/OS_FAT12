@@ -41,6 +41,9 @@ int main(int argc, char **argv)
 		line = getInput(CPATH);
 		args = parseInput(line);
 
+		if(args == NULL)
+			continue;
+
 		if( (strncmp(args[0], "exit", 4) == 0) || (strncmp(args[0], "logout", 6) == 0) ){
 			status = 1;
 			continue;

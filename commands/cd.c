@@ -8,6 +8,7 @@
 
 int main(int argc, char** argv) {
 
+
 	void *shPtr;
 	char rDir[] = "ROOT";
 	char slash[] = "/";
@@ -31,27 +32,33 @@ int main(int argc, char** argv) {
 	}
 	else if(argc == 2){
 
-		FileData entry;
-		CurrentPath tmp;
+		if( (strcmp(argv[1], ".") == 0 || strcmp(argv[1], "..") == 0) && strcmp(CPATH.path, "ROOT") == 0) {
+			printf("user is already in root\n");	
+		} 
+		else {
 
-		entry = searchEntries(argv[1], numSector);
+			FileData *entry;
+			CurrentPath tmp;
 
-		if(strcmp(entry.fileName, "        ") != 0){
-
-			if( !isFile(entry) ){
-
-				strcat(CPATH.path, slash);
-				strcat(CPATH.path, argv[1]);
-				CPATH.sectorNum = entry.flc;
-
-				memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c
-			}
-			else
-				printf("argument provided was a file, not a directory\n");
-
-		} else
-			printf("directory does not exist\n");
+			entry = searchEntries(argv[1], numSector);
 			
+			if(entry != NULL){
+
+				if( !isFile(*entry) ){
+
+					strcat(CPATH.path, slash);
+					strcat(CPATH.path, argv[1]);
+					CPATH.sectorNum = entry->flc;
+
+					memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c
+				}
+				else
+					printf("argument provided was a file, not a directory\n");
+
+			} else
+				printf("directory does not exist\n");
+
+		}
 		
 
 	} else {

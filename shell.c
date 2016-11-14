@@ -113,7 +113,7 @@ char** parseInput(char* input){
 	// space delimited tokenizing 
 	token = strtok(holder, spaceDelim);
 	if( token == NULL )
-		printf("Error space delimiting\n");
+		return NULL; //so shell can handle no arguments without seg faulting
 
 	// loop through until all tokens are handed off to parsedInput
 	while(token!= NULL){

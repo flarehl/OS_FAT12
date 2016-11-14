@@ -362,76 +362,77 @@ char** parsePath(char* path){
 *
 * Return: FileData object holding entry info
 *****************************************************************************/
-FileData readEntry(char* buffer, int *offset){
+FileData* readEntry(char* buffer, int *offset){
 
-   FileData entry;
+   FileData* entry;
+   entry = (FileData*)malloc(sizeof(FileData));
 
    int i;
    for(i = 0; i < 8; i++){
-      entry.fileName[i] = buffer[*offset];
+      entry->fileName[i] = buffer[*offset];
       (*offset)++;
    }
-   entry.fileName[i] = '\0';
+   entry->fileName[i] = '\0';
 
    for(i = 0; i < 3; i++){
-      entry.fileExt[i] = buffer[*offset];          
+      entry->fileExt[i] = buffer[*offset];          
       (*offset)++;
    }
-   entry.fileExt[i] = '\0';
+   entry->fileExt[i] = '\0';
 
-   entry.fileAttributes = buffer[*offset];
+   entry->fileAttributes = buffer[*offset];
    (*offset)++;
 
    short mostSignificantBits = (((short)buffer[*offset+1]) << 8) & 0xff00;
    short leastSignificantBits = ((short)buffer[*offset]) & 0x00ff;
-   entry.reserved = mostSignificantBits | leastSignificantBits;
+   entry->reserved = mostSignificantBits | leastSignificantBits;
 
    *offset += 2;
 
    for(i = 0; i < 2; i++){
-      entry.createTime[i] = buffer[*offset];
+      entry->createTime[i] = buffer[*offset];
       (*offset)++;
    }
-   entry.createTime[i] = '\0';
+   entry->createTime[i] = '\0';
 
    for(i = 0; i < 2; i++){
-      entry.createDate[i] = buffer[*offset];
+      entry->createDate[i] = buffer[*offset];
       (*offset)++;
    }
-   entry.createDate[i] = '\0';  
+   entry->createDate[i] = '\0';  
 
    for(i = 0; i < 2; i++){
-      entry.lastAccessDate[i] = buffer[*offset];
+      entry->lastAccessDate[i] = buffer[*offset];
       (*offset)++;
    }
-   entry.lastAccessDate[i] = '\0';
+   entry->lastAccessDate[i] = '\0';
 
    //ignore 2 bytes here
    (*offset)+=2;
 
    for(i = 0; i < 2; i++){
-      entry.lastWriteTime[i] = buffer[*offset];
+      entry->lastWriteTime[i] = buffer[*offset];
       (*offset)++;
    }
-   entry.lastWriteTime[i] = '\0';
+   entry->lastWriteTime[i] = '\0';
 
 
    for(i = 0; i < 2; i++){
-      entry.lastWriteDate[i] = buffer[*offset];
+      entry->lastWriteDate[i] = buffer[*offset];
       (*offset)++;
    }
-   entry.lastWriteDate[i] = '\0';
+   entry->lastWriteDate[i] = '\0';
 
    mostSignificantBits = (((short)buffer[*offset+1]) << 8) & 0xff00;
    leastSignificantBits = ((short)buffer[*offset]) & 0x00ff;
-   entry.flc = mostSignificantBits | leastSignificantBits;
+   entry->flc = mostSignificantBits | leastSignificantBits;
    *offset += 2;
 
    mostSignificantBits = (((int)buffer[*offset+3]) << 24) & 0xff000000;
    int midBits = ((int)buffer[*offset+2] << 16) & 0x00ff0000;
    int midBits2 = ((int)buffer[*offset+1] << 8) & 0x0000ff00;
    leastSignificantBits = ((int)buffer[*offset]) & 0x000000ff;
-   entry.fileSize = (mostSignificantBits | midBits | midBits2 | leastSignificantBits) ;
+   entry->fileSize = (mostSignificantBits | midBits | midBits2 | leastSignificantBits) ;
 
    *offset += 4;
 
@@ -490,10 +491,10 @@ unsigned char* readFAT12Table(int FAT_Number) {
 * Return: if entry does not exist, returns FileData object with blank 
 *         file name
 *****************************************************************************/
-FileData searchEntries(char* fileName, int sectorNumber){
+FileData* searchEntries(char* fileName, int sectorNumber){
 
-   FileData nEntry; //used as empty value
-   FileData entry;
+   FileData *nEntry; //used as empty value
+   FileData *entry;
    int offset = 0;
 
    FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
@@ -509,8 +510,10 @@ FileData searchEntries(char* fileName, int sectorNumber){
       exit(1);
    }
 
-   fileName = fileTranslate(fileName);
+   if( strcmp(fileName, ".") != 0 || strcmp(fileName, "..") != 0){
+      fileName = fileTranslate(fileName);
 
+   }
 
    /*put in do while loop to deal with directories spanning multiple sectors*/
 
@@ -520,22 +523,24 @@ FileData searchEntries(char* fileName, int sectorNumber){
 
          entry = readEntry(buffer, &offset);
 
-
-         if( entry.fileName[0] == (char)0x00 ){
+         if( entry->fileName[0] == (char)0x00 ){
             break; //if empty, break
          }
-         else if( entry.fileAttributes == (char)0x0f || entry.fileName[0] == (char)0xE5 ){
+         else if( entry->fileAttributes == (char)0x0f || entry->fileName[0] == (char)0xE5 ){
             continue;
 
          }else{
 
-            char* name = strtok(entry.fileName, " ");
-            if(entry.fileExt[0] != ' '){
+            char* name = strtok(entry->fileName, " ");
+            if(entry->fileExt[0] != ' '){
                char space[] = " ";
                strcat(name, space);
-               strcat(name, entry.fileExt);
+               strcat(name, entry->fileExt);
             }
             //translate filename if theres a dot
+
+
+            //printf("entry fname %s\n", entry.fileName);
 
             if( strncmp(name, fileName, strlen(fileName)) == 0 )
                return entry; 
@@ -544,8 +549,7 @@ FileData searchEntries(char* fileName, int sectorNumber){
 
       }
 
-   entry = nEntry;
-   return entry;
+   return NULL;
 
 }
 
@@ -582,8 +586,7 @@ char* fileTranslate(char* fileName){
 * itemName: the name of the file or directory that is being searched for
 * directory: the current sector of the directory being searched
 *  
-* Return: a bool that states true if the file or direcotry exists and false
-* if it does not.
+* Return: 
 *****************************************************************************/
 int itemExists(char *itemName, unsigned char *directory)
 {
@@ -618,7 +621,7 @@ int itemExists(char *itemName, unsigned char *directory)
             {
                 holder = directory[currentOffset + 8 + j];
             
-                if(holder == (char *)0x20)
+                if(holder == (char)0x20)
                 {
                     continue;
                 }
