@@ -1,4 +1,4 @@
-commands: pbs pfe ls cd pwd rm
+command: pbs pfe ls cd pwd rm
 
 pbs: pbs.c
 	gcc -o pbs pbs.c cmdSupport.c -I.

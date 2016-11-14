@@ -59,7 +59,6 @@ int main(int argc, char** argv) {
 				printf("directory does not exist\n");
 
 		}
-		
 
 	} else {
 		printf("cd may only handle 1 or 2 arguments\n");

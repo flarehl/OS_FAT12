@@ -512,7 +512,6 @@ FileData* searchEntries(char* fileName, int sectorNumber){
 
    if( strcmp(fileName, ".") != 0 || strcmp(fileName, "..") != 0){
       fileName = fileTranslate(fileName);
-
    }
 
    /*put in do while loop to deal with directories spanning multiple sectors*/
