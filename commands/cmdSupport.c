@@ -493,6 +493,8 @@ unsigned char* readFAT12Table(int FAT_Number) {
 *         file name
 *****************************************************************************/
 FileData* searchEntries(char* fileName, int sectorNumber){
+   
+   //* TEST */printf("sectorNum: %i.\n", sectorNumber);
 
    FileData *nEntry; //used as empty value
    FileData *entry;
@@ -507,7 +509,7 @@ FileData* searchEntries(char* fileName, int sectorNumber){
    //read in the appropriate sector set by sectorNumber
    char *buffer = (char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
    if (read_sector(sectorNumber, buffer) == -1) {
-      printf("Something has gone wrong -- could not read the boot sector\n");
+      printf("Something has gone wrong -- could not read the sector\n");
       exit(1);
    }
 
@@ -519,9 +521,13 @@ FileData* searchEntries(char* fileName, int sectorNumber){
 
       for(int i = 0; i < 16; i++){ // 16 entries per sector
 
+         //reaches here 
          entry = nEntry; //to reset values, spaghettiiiiiii
 
-         entry = readEntry(buffer, &offset);
+         if( (entry = readEntry(buffer, &offset)) == NULL){
+            printf("Cannot read entry\n");
+            break;
+         }
 
          if( entry->fileName[0] == (char)0x00 ){
             break; //if empty, break

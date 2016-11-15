@@ -22,10 +22,30 @@ int main(int argc, char** argv) {
 		numSector = CPATH.sectorNum;
 
 	//translate to physical sec num
-	if(strcmp(CPATH.path,"ROOT") != 0)
-		numSector += 31;
 	if(CPATH.sectorNum == 0)
 		numSector = 19;
+	else
+		numSector += 31;
+
+
+
+	/* 
+		if argc is 2, then parse the path argument and search for each entry
+
+		if the last filename is a file(last token before NULL) then show entry attributes
+
+		if last filename is a directory just do the thing underneath
+
+	*/
+
+	if(argc == 2){
+
+		char** tmp;
+		tmp = parsePath(argv[1]); 
+
+
+	}
+
 
 	printf("_____________________________________________\n");
 	printf("%-13s %7s %12s %6s\n", "File Name", "Type", "File Size", "FLC");

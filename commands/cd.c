@@ -14,11 +14,14 @@ int main(int argc, char** argv) {
 	char slash[] = "/";
 
 	accessShmem(&shPtr); //passing address of the pointer, int value
+	memset(CPATH.path, '\0', MAX_PATH);
 	memcpy(&CPATH, shPtr, SHMEMSIZE); //read in from shared memory
 
 	//if cwd is not root, translate logical sector numbe
 	int numSector = CPATH.sectorNum;
-	if(strcmp(CPATH.path,"ROOT") != 0)
+	if(numSector == 0)
+		numSector = 19;
+	else 
 		numSector += 31;
 
 	//if argument is blank
@@ -45,10 +48,10 @@ int main(int argc, char** argv) {
 
 			if((entry = searchEntries(argv[1], numSector)) != NULL && strcmp(argv[1], "..") == 0){
 
-				strcpy(tmpPath, CPATH.path); //copy path for memory 
+				strcpy(tmpPath, CPATH.path); //copy path for memory
 				parsed = parsePath(tmpPath);
 
-				memset(CPATH.path, '\0', MAX_PATH);	
+				memset(CPATH.path, '\0', MAX_PATH);
 
 				int i = 0;
 				// gets the last filename that needs to be pruned
@@ -58,7 +61,7 @@ int main(int argc, char** argv) {
 				}
 
 				CPATH.sectorNum = entry->flc; //set to previous sector
-				
+
 				i = 0;
 				// recreate CPATH
 				while(parsed != NULL){
@@ -74,7 +77,6 @@ int main(int argc, char** argv) {
 
 			} else if(strcmp(argv[1], ".") == 0 ){
 				//do nothing, print the CPATH.path
-				memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c
 			}
 			else
 				printf(". and .. unavailable\n");
@@ -86,9 +88,9 @@ int main(int argc, char** argv) {
 
 				if( !isFile(*entry) ){
 
-					strcat(CPATH.path, slash);
 					strcat(CPATH.path, argv[1]);
-					CPATH.sectorNum = entry->flc;	
+					strcat(CPATH.path, slash);
+					CPATH.sectorNum = entry->flc;
 
 					memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c
 				}
