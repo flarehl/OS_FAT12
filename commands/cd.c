@@ -14,14 +14,14 @@ int main(int argc, char** argv) {
 	char slash[] = "/";
 
 	accessShmem(&shPtr); //passing address of the pointer, int value
-	memset(CPATH.path, '\0', MAX_PATH);
 	memcpy(&CPATH, shPtr, SHMEMSIZE); //read in from shared memory
 
-	//if cwd is not root, translate logical sector number
+	//if cwd is not root, translate logical sector numbe
 	int numSector = CPATH.sectorNum;
 	if(strcmp(CPATH.path,"ROOT") != 0)
 		numSector += 31;
 
+	//if argument is blank
 	if(argc == 1){ 
 		memset(CPATH.path, '\0', sizeof(CPATH.path));
 		strncpy(CPATH.path, rDir, 4);		
@@ -30,19 +30,57 @@ int main(int argc, char** argv) {
 		return 0;
 
 	}
-	else if(argc == 2){
+	else if(argc == 2){ 
 
-		if( (strcmp(argv[1], ".") == 0 || strcmp(argv[1], "..") == 0) && strcmp(CPATH.path, "ROOT") == 0) {
-			printf("user is already in root\n");	
-		} 
+		FileData *entry;
+		CurrentPath tmp;
+		char* tmpPath = (char*)malloc(SHMEMSIZE * sizeof(char));
+		char* last;
+		char** parsed;
+
+		if( (strcmp(argv[1], ".") == 0 || strcmp(argv[1], "..") == 0) && strcmp(CPATH.path, "ROOT") == 0) 
+			printf("user is already in root\n");
+
+		else if(strcmp(argv[1], ".") == 0 || strcmp(argv[1], "..") == 0){
+
+			if((entry = searchEntries(argv[1], numSector)) != NULL && strcmp(argv[1], ".") != 0){
+
+				strcpy(tmpPath, CPATH.path); //copy path for memory
+				parsed = parsePath(tmpPath);
+
+				memset(CPATH.path, '\0', MAX_PATH);	
+				CPATH.sectorNum = entry->flc; //set to previous sector
+
+				int i = 0;
+				// gets the last filename that needs to be pruned
+				while(parsed[i] != NULL){
+					last = parsed[i];
+					i++;
+				}
+
+				i = 0;
+				// recreate CPATH
+				while(parsed != NULL){
+
+					if(strcmp(last, parsed[i]) != 0){
+						strcat(CPATH.path, parsed[i]);
+						strcat(CPATH.path, slash);
+					}
+					i++;
+					memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c
+
+				}
+
+			} else if(strcmp(argv[1], ".") == 0 ){
+				//do nothing, fix during refactoring
+			}
+			else
+				printf(". and .. unavailable\n");
+
+		}	
 		else {
 
-			FileData *entry;
-			CurrentPath tmp;
-
-			entry = searchEntries(argv[1], numSector);
-			
-			if(entry != NULL){
+			if((entry = searchEntries(argv[1], numSector)) != NULL){
 
 				if( !isFile(*entry) ){
 
@@ -55,14 +93,15 @@ int main(int argc, char** argv) {
 				else
 					printf("argument provided was a file, not a directory\n");
 
+
 			} else
 				printf("directory does not exist\n");
 
 		}
 
-	} else {
+	} else 
 		printf("cd may only handle 1 or 2 arguments\n");
-	}
+	
 
 
 	detachShmem(shPtr);

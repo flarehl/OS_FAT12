@@ -331,6 +331,7 @@ char** parsePath(char* path){
 
       for(int i = 0; i < strlen(token); i++)
          token[i] = toupper(token[i]);
+
       args[location] = token;
       location++;
 
@@ -510,7 +511,7 @@ FileData* searchEntries(char* fileName, int sectorNumber){
       exit(1);
    }
 
-   if( strcmp(fileName, ".") != 0 || strcmp(fileName, "..") != 0){
+   if( strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0){
       fileName = fileTranslate(fileName);
    }
 
@@ -531,17 +532,14 @@ FileData* searchEntries(char* fileName, int sectorNumber){
          }else{
 
             char* name = strtok(entry->fileName, " ");
+
             if(entry->fileExt[0] != ' '){
                char space[] = " ";
                strcat(name, space);
                strcat(name, entry->fileExt);
             }
-            //translate filename if theres a dot
-
-
-            //printf("entry fname %s\n", entry.fileName);
-
-            if( strncmp(name, fileName, strlen(fileName)) == 0 )
+  
+            if( strcmp(name, fileName) == 0 )
                return entry; 
 
          }
