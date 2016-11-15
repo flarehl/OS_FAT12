@@ -535,8 +535,11 @@ FileData* searchEntries(char* fileName, int sectorNumber){
 
             if(entry->fileExt[0] != ' '){
                char space[] = " ";
+               char *ext;
+
+               ext = strtok(entry->fileExt, space);
                strcat(name, space);
-               strcat(name, entry->fileExt);
+               strcat(name, ext);
             }
   
             if( strcmp(name, fileName) == 0 )

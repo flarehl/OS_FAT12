@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
 
 		FileData *entry;
 		CurrentPath tmp;
-		char* tmpPath = (char*)malloc(SHMEMSIZE * sizeof(char));
+		char* tmpPath = (char*)malloc(SHMEMSIZE * sizeof(char)); 
 		char* last;
 		char** parsed;
 
@@ -43,13 +43,12 @@ int main(int argc, char** argv) {
 
 		else if(strcmp(argv[1], ".") == 0 || strcmp(argv[1], "..") == 0){
 
-			if((entry = searchEntries(argv[1], numSector)) != NULL && strcmp(argv[1], ".") != 0){
+			if((entry = searchEntries(argv[1], numSector)) != NULL && strcmp(argv[1], "..") == 0){
 
-				strcpy(tmpPath, CPATH.path); //copy path for memory
+				strcpy(tmpPath, CPATH.path); //copy path for memory 
 				parsed = parsePath(tmpPath);
 
 				memset(CPATH.path, '\0', MAX_PATH);	
-				CPATH.sectorNum = entry->flc; //set to previous sector
 
 				int i = 0;
 				// gets the last filename that needs to be pruned
@@ -58,6 +57,8 @@ int main(int argc, char** argv) {
 					i++;
 				}
 
+				CPATH.sectorNum = entry->flc; //set to previous sector
+				
 				i = 0;
 				// recreate CPATH
 				while(parsed != NULL){
@@ -72,7 +73,8 @@ int main(int argc, char** argv) {
 				}
 
 			} else if(strcmp(argv[1], ".") == 0 ){
-				//do nothing, fix during refactoring
+				//do nothing, print the CPATH.path
+				memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c
 			}
 			else
 				printf(". and .. unavailable\n");
@@ -86,7 +88,7 @@ int main(int argc, char** argv) {
 
 					strcat(CPATH.path, slash);
 					strcat(CPATH.path, argv[1]);
-					CPATH.sectorNum = entry->flc;
+					CPATH.sectorNum = entry->flc;	
 
 					memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c
 				}

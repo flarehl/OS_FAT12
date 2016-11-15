@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include "cmdSupport.h"
 
-bool isLongFile(FileData);
-
 int main(int argc, char** argv) {
 
 	void *shPtr;
@@ -10,7 +8,6 @@ int main(int argc, char** argv) {
 	accessShmem(&shPtr); //passing address of the pointer, int value
 	memset(CPATH.path, '\0', MAX_PATH);
 	memcpy(&CPATH, shPtr, SHMEMSIZE); //read in from shared memory
-
 
 	FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
 	if (FILE_SYSTEM_ID == NULL) {
@@ -24,9 +21,11 @@ int main(int argc, char** argv) {
 	int offset = 0,
 		numSector = CPATH.sectorNum;
 
-	//if cwd is not root, translate logical sector number
+	//translate to physical sec num
 	if(strcmp(CPATH.path,"ROOT") != 0)
 		numSector += 31;
+	if(CPATH.sectorNum == 0)
+		numSector = 19;
 
 	printf("_____________________________________________\n");
 	printf("%-13s %7s %12s %6s\n", "File Name", "Type", "File Size", "FLC");
@@ -43,7 +42,11 @@ int main(int argc, char** argv) {
 
 			entry = nEntry; //to reset values, spaghettiiiiiii
 
-			entry = readEntry(buffer, &offset);
+			if( (entry = readEntry(buffer, &offset)) == NULL )
+				break;
+
+			if(strcmp(CPATH.path,"ROOT") != 0 && strcmp(CPATH.path,"ROOT/") != 0)
+				CPATH.sectorNum += 31;
 
 			if( entry->fileName[0] == (char)0x00 || entry->fileName[0] == (char)0xf6){ //needs an or with 0xF6
 				break; //fix this later
