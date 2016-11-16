@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
 						strcat(CPATH.path, slash);
 					}
 					i++;
-					memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c
+					memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c, can be put outside loop??
 
 				}
 
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
 
 			if((entry = searchEntries(argv[1], numSector)) != NULL){
 
-				if( !isFile(*entry) ){
+				if( !isFile(entry) ){
 
 					strcat(CPATH.path, argv[1]);
 					strcat(CPATH.path, slash);

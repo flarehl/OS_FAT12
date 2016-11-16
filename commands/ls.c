@@ -3,6 +3,11 @@
 
 int main(int argc, char** argv) {
 
+	if(argc < 1 || argc > 2){
+		printf("command supports 0-1 arguments\n");
+		return -1;
+	}
+
 	void *shPtr;
 
 	accessShmem(&shPtr); //passing address of the pointer, int value
@@ -28,34 +33,47 @@ int main(int argc, char** argv) {
 		numSector += 31;
 
 
-
-	/* 
-		if argc is 2, then parse the path argument and search for each entry
-
-		if the last filename is a file(last token before NULL) then show entry attributes
-
-		if last filename is a directory just do the thing underneath
-
-	*/
-
-	if(argc == 2){
-
-		char** tmp;
-		tmp = parsePath(argv[1]); 
-
-
-	}
-
-
 	printf("_____________________________________________\n");
 	printf("%-13s %7s %12s %6s\n", "File Name", "Type", "File Size", "FLC");
 	printf("_____________________________________________\n");
 
 	do { //for reading in entries from struct
 
+		/* 
+			if argc is 2, then parse the path argument and search for each entry
+			if the last filename is a file(last token before NULL) then show entry attributes
+			if last filename is a directory just do the thing underneath
+		*/
+
+
 		if (read_sector(numSector, buffer) == -1) {
 			printf("Something has gone wrong -- could not read the sector\n");
 			return -1;
+		}
+
+
+		if(argc == 2){
+
+			int i = 0;
+			char** tmp;
+			char* last;
+			tmp = parsePath(argv[1]); 
+
+			// gets the last filename that needs to be displayed
+			while(tmp[i] != NULL){
+				last = tmp[i];
+
+				if((numSector = itemExists(tmp[i], buffer)) == -1)
+					return -1;
+
+				i++;
+			}
+
+			//if items exists until (last, tmp[i]), then searchEntries
+			//* TEST */printf("tmp[%i]: %s\n", i, tmp[i]);
+
+
+
 		}
 
 		for(int i = 0; i < 16; i++){ // 16 entries per sector
@@ -68,15 +86,13 @@ int main(int argc, char** argv) {
 			if(strcmp(CPATH.path,"ROOT") != 0 && strcmp(CPATH.path,"ROOT/") != 0)
 				CPATH.sectorNum += 31;
 
-			if( entry->fileName[0] == (char)0x00 || entry->fileName[0] == (char)0xf6){ //needs an or with 0xF6
+			if( isEmpty(entry) || entry->fileName[0] == (char)0xf6){ //needs an or with 0xF6
 				break; //fix this later
 			}
-			else if( entry->fileAttributes == (char)0x0f || entry->fileName[0] == (char)0xE5 ){
+			else if( isLongFile(entry) || isDeleted(entry) ){
 				continue;
 
 			}else{
-
-				/* HANDLE THE RELATIVE AND ABSOLUTE */
 
 				//space delimit to get rid of padding for file name and concatenate with dot before extension 
 				char* name = strtok(entry->fileName, " ");
@@ -90,7 +106,7 @@ int main(int argc, char** argv) {
 				char dir[] = "dir";
 
 				char* type;
-				if(isFile(*entry))
+				if(isFile(entry))
 					type = file;
 				else
 					type = dir;
@@ -103,13 +119,13 @@ int main(int argc, char** argv) {
 
 
 		// if entire sector is read, then keep reading next sector in root directory
-		if(entry->fileName[0] != (char)0x00 && entry->fileName[0] != (char)0xE5 ){
+		if(!isEmpty(entry) && !isDeleted(entry) ){
 		 	numSector++;
 		}
 		
 		offset = 0;
 
-	} while (entry->fileName[0] != (char)0x00 && numSector < 32);
+	} while (!isEmpty(entry) && numSector < 32);
 
 	return 0;
 }

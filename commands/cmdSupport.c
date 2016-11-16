@@ -222,14 +222,15 @@ bool isAbsolutePath(char* path){
 *
 * Return: true if the entry has been deleted, return false otherwise
 *****************************************************************************/
-bool isDeleted(FileData entry){
+bool isDeleted(FileData *entry){
 
-   if(entry.fileName[0] == (char)0xE5)
+   if(entry->fileName[0] == (char)0xE5)
       return TRUE;
    else
       return FALSE;
 
 }
+
 
 /******************************************************************************
 * isEmpty
@@ -240,9 +241,9 @@ bool isDeleted(FileData entry){
 *
 * Return: true if entry is not empty, return false otherwise
 *****************************************************************************/
-bool isEmpty(FileData entry){
+bool isEmpty(FileData *entry){
 
-   if (entry.fileName[0] == (char)0x00 )
+   if (entry->fileName[0] == (char)0x00 )
       return TRUE; 
    else
       return FALSE;
@@ -260,9 +261,9 @@ bool isEmpty(FileData entry){
 *
 * Return: true if entry is a file, return false otherwise
 *****************************************************************************/
-bool isFile(FileData entry){
+bool isFile(FileData *entry){
 
-   if ((entry.fileAttributes & (char)0x10 ) == (char)0x10 )
+   if ((entry->fileAttributes & (char)0x10 ) == (char)0x10 )
       return FALSE; 
    else
       return TRUE;
@@ -279,9 +280,9 @@ bool isFile(FileData entry){
 *
 * Return: true if file entry should be ignored
 *****************************************************************************/
-bool isLongFile(FileData entry){
+bool isLongFile(FileData *entry){
 
-   if(entry.fileAttributes == 0x0f)
+   if(entry->fileAttributes == 0x0f)
       return TRUE;
    else 
       return FALSE;
@@ -592,7 +593,7 @@ char* fileTranslate(char* fileName){
 * itemName: the name of the file or directory that is being searched for
 * directory: the current sector of the directory being searched
 *  
-* Return: 
+* Return: the found sectors number or -1 if not found
 *****************************************************************************/
 int itemExists(char *itemName, unsigned char *directory)
 {
