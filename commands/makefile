@@ -7,7 +7,7 @@ pfe: pfe.c
 	gcc -o pfe pfe.c cmdSupport.c -I.
 
 ls: ls.c 
-	gcc -o ls ls.c cmdSupport.c ../utilities/shmem.c -I.
+	gcc -g -o ls ls.c cmdSupport.c ../utilities/shmem.c -I.
 
 cd: cd.c
 	gcc -o cd cd.c cmdSupport.c ../utilities/shmem.c -I.

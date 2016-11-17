@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 			while(tmp[i] != NULL){
 				last = tmp[i];
 
-				if((numSector = itemExists(tmp[i], buffer)) == -1)
+				if((numSector = getSectorOffset(tmp[i], buffer)) == -1)
 					return -1;
 
 				i++;

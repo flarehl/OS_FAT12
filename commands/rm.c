@@ -57,7 +57,7 @@ int main(int argc, char **argv)
         }
         set_fat_entry(fatEntryNumber, 0x000, fat);
         
-        offset = itemExists(parsedPath, directory); //gets the actaul offset of
+        offset = getSectorOffset(parsedPath, directory); //gets the actaul offset of
         //the location
         if(offset == -1)
         {

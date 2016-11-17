@@ -595,17 +595,17 @@ char* fileTranslate(char* fileName){
 *  
 * Return: the found sectors number or -1 if not found
 *****************************************************************************/
-int itemExists(char *itemName, unsigned char *directory)
+int getSectorOffset(char *itemName, unsigned char *directory)
 {
     char currentItemName[12];
+    char userInput[12];
     char holder;
     int currentOffset = 0x00;
     bool fileExists = FALSE;
     int i, j;
     int currentItemNameSize; //needed to keep track of the actaul size of the
         //item being checked
-    
-
+    //tried this (holder>= (char)0x41 && holder <= (char)0x5A) || (holder>= (char)0x30 & holder <= (char)0x39)
     for(i = 0; i < 16; i++)
     {
         if(fileExists == FALSE)
@@ -613,9 +613,9 @@ int itemExists(char *itemName, unsigned char *directory)
             for(j = 0; j < 8; j++) //This loop gets the file name
             {
                holder = (char ) directory[currentOffset +j];
-                if(holder == (char)0x20) //This should jump over any whitespace
+                if(holder <(char)0x30 || holder > (char)0x5B) //This should jump over any whitespace
                 {
-                 continue;
+		  // continue;
                 }
                 else
                 {
@@ -628,9 +628,9 @@ int itemExists(char *itemName, unsigned char *directory)
             {
                 holder = directory[currentOffset + 8 + j];
             
-                if(holder == (char)0x20)
+                if(holder <(char)0x30 || holder > (char)0x5B)
                 {
-                    continue;
+		  // continue;
                 }
                 else
                 {
@@ -638,21 +638,28 @@ int itemExists(char *itemName, unsigned char *directory)
                     currentItemNameSize++;
                 }
             }
+           
             
-            if(currentItemName == itemName)
+            if(strcmp(currentItemName, itemName) == 0)
             {
                 fileExists = TRUE;
+		printf("Found!");
             }
             else
             {
                 currentOffset = currentOffset + 0x20;
             }
+            
+            memset(currentItemName, 0, 12);
+            
+	    currentItemNameSize = 0;
         }
         
     }
     
     if(fileExists == FALSE)
     {
+        printf("Doesn't exist\n");
         return -1;
     }
     else
