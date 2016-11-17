@@ -60,9 +60,7 @@ int main(int argc, char** argv) {
 				}
 
 				CPATH.sectorNum = entry->flc; //set to previous sector
-
-				//if(CPATH.sectorNum == 0)
-					strcat(CPATH.path, slash); // slashes added before ROOT in this case
+				strcat(CPATH.path, slash); 
 
 				i = 0;
 				// recreate CPATH

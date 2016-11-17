@@ -22,13 +22,13 @@ void executeCmd(char **args) {
 
 		//use switch statement for different commands??
 		if (execvp( strcat(command,args[0]), args ) < 0) {    
-			printf("Error executing command\n");
+			printf("%s: Command does not exist\n", args[0]);
 			exit(1);
 		}
 
 	} 
 	else {                                  
-	  while (wait(&status) != pid);       //wait until child process ends
+	  while (wait(&status) != pid);  //wait until child process ends
 	}
 }
 

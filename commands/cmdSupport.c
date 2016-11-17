@@ -100,7 +100,6 @@ int write_sector(int sector_number, unsigned char* buffer)
  * printf("Directory listing returned %d entries:\n", dnum);
  * Return: the value at the specified entry of the given FAT
  ****************************************************************************/
-
 unsigned int get_fat_entry(int fat_entry_number, unsigned char* fat) 
 {
    int offset;
@@ -308,7 +307,7 @@ char** parsePath(char* path){
 
    token = strtok(path, slashDelim);
    if( token == NULL )
-      printf("Error slash delimiting\n");
+      return NULL;
 
    // loop through until all tokens are handed off to parsedInput
    while(token!= NULL){
@@ -529,7 +528,7 @@ FileData* searchEntries(char* fileName, int sectorNumber){
                strcat(name, space);
                strcat(name, ext);
             }
-            
+
             if( strcmp(name, fileName) == 0 ){
                return entry; 
             }
