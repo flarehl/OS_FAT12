@@ -26,10 +26,21 @@ int main(int argc, char**argv){
 
 		while( i < getArgc(entryNames) ){
 
-			if((entry = searchEntries(entryNames[i], numSector)) == NULL){
+			if((entry = searchEntries(entryNames[i], numSector)) == NULL && i == (getArgc(entryNames) - 1) ){
 				
 				//directory does not exist, create new directory
+				//see project_spec for steps
+				return 0;
 
+			}
+			else if((entry = searchEntries(entryNames[i], numSector)) != NULL && i != (getArgc(entryNames) - 1)){
+
+				if(entry->flc == 0)
+					numSector = 19;
+				else
+					numSector = entry->flc + 31;
+					
+				i++;
 			}
 			else{
 				printf("entry already exists\n");
