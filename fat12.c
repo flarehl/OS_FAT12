@@ -20,13 +20,13 @@ int main(int argc, char **argv)
 {
 	/* Initialize shared memory segment*/
 	void *shPtr;
-	char dir[] = "ROOT/";
+	char dir[] = "/";
 
 	createShmem(&shPtr); //passing address of the pointer, int value
 
 	memset(CPATH.path, '\0', MAX_PATH);
 
-	strncpy(CPATH.path, dir, 5);
+	strncpy(CPATH.path, dir, 1);
 	CPATH.sectorNum = 0;
 	memcpy(shPtr, &CPATH, SHMEMSIZE); //sets shared memory variables
 

@@ -198,22 +198,6 @@ int getPhysSector(int logicalNum){
 
 
 /******************************************************************************
-* isAbsolutePath
-*
-* checks if the argument provided is an absolute path
-*
-* path: first file name
-*
-* Return: true if absolute path
-*****************************************************************************/
-bool isAbsolutePath(char* path){
-   if( strncmp(path, "root", 4) == 0 )
-      return TRUE;
-   else
-      return FALSE;
-}
-
-/******************************************************************************
 * isDeleted
 *
 * checks if file entry is deleted
@@ -290,21 +274,20 @@ bool isLongFile(FileData *entry){
 
 
 /******************************************************************************
-* isRelativePath
+* isReserved
 *
-* checks if the argument provided is a relative path
+* checks if the entry is reserved
 *
-* path: first file name
+* entry: the entry to check
 *
-* Return: return true if relative path
+* Return: return true if first byte of filename is 0xf6
 *****************************************************************************/
-bool isRelativePath(char* path){
-   if( strncmp(path, "./", 2) || strncmp(path, "../", 3) )
+bool isReserved(FileData* entry){
+   if( entry->fileName[0] ==(char)0xf6 )
       return TRUE; //add isExist()
    else
       return FALSE;
 }
-
 
 /******************************************************************************
 * parsePath
@@ -494,8 +477,6 @@ unsigned char* readFAT12Table(int FAT_Number) {
 *         file name
 *****************************************************************************/
 FileData* searchEntries(char* fileName, int sectorNumber){
-   
-   //* TEST */printf("sectorNum: %i.\n", sectorNumber);
 
    FileData *nEntry; //used as empty value
    FileData *entry;
@@ -530,13 +511,13 @@ FileData* searchEntries(char* fileName, int sectorNumber){
             break;
          }
 
-         if( entry->fileName[0] == (char)0x00 ){
-            break; //if empty, break
+         if( isEmpty(entry) || isReserved(entry)){
+            break; 
          }
-         else if( entry->fileAttributes == (char)0x0f || entry->fileName[0] == (char)0xE5 ){
+         else if( isLongFile(entry) || isDeleted(entry) ){
             continue;
-
-         }else{
+         }
+         else{
 
             char* name = strtok(entry->fileName, " ");
 
@@ -548,9 +529,10 @@ FileData* searchEntries(char* fileName, int sectorNumber){
                strcat(name, space);
                strcat(name, ext);
             }
-  
-            if( strcmp(name, fileName) == 0 )
+            
+            if( strcmp(name, fileName) == 0 ){
                return entry; 
+            }
 
          }
 
@@ -593,7 +575,7 @@ char* fileTranslate(char* fileName){
 * itemName: the name of the file or directory that is being searched for
 * directory: the current sector of the directory being searched
 *  
-* Return: the found sectors number or -1 if not found
+* Return: the current offset in the buffer, otherwise returns -1
 *****************************************************************************/
 int itemExists(char *itemName, unsigned char *directory)
 {
@@ -661,4 +643,41 @@ int itemExists(char *itemName, unsigned char *directory)
         //-1 if the file doesn't exist at all
     }
  
+}
+
+
+void displayLs(FileData* entry){
+
+   //*space delimit to get rid of padding for file name and concatenate with dot before extension 
+   char* name = strtok(entry->fileName, " ");
+   if(entry->fileExt[0] != ' '){
+      char dot[] = "."; //strcat doesnt play well with 
+      strcat(name, dot);
+   }
+
+   //wrap into char* getType() later
+   char file[] = "file";
+   char dir[] = "dir";
+
+   char* type;
+   if(isFile(entry))
+      type = file;
+   else
+      type = dir;
+   
+
+   printf("%-13s %7s %12d %6d\n", strcat(name, entry->fileExt), type, entry->fileSize, entry->flc);
+
+}
+
+
+int getArgc(char** args){
+
+   int i = 0;
+
+   while(args[i] != NULL){
+      i++;
+   }
+
+   return i;
 }
