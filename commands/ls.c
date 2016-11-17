@@ -7,7 +7,8 @@ void displayDirectory(int);
 int main(int argc, char** argv) {
 
 	/* Input Validation */
-	if(argc < 1 || argc > 2){
+	if(argc < 1 || argc > 2)
+	{
 		printf("command supports 0-1 arguments\n");
 		return -1;
 	}
@@ -37,9 +38,11 @@ int main(int argc, char** argv) {
 	printf("_____________________________________________\n");
 
 
-	if(argc == 2){
+	if(argc == 2)
+	{
 	
-		if(strcmp(argv[1], "/") == 0 || strcmp(argv[1], ".") == 0){
+		if(strcmp(argv[1], "/") == 0 || strcmp(argv[1], ".") == 0)
+		{
 			displayDirectory(numSector);
 			return 0;
 		}
@@ -47,14 +50,11 @@ int main(int argc, char** argv) {
 
 		entryNames = parsePath(argv[1]);
 
-<<<<<<< HEAD
-				if((numSector = getSectorOffset(tmp[i], buffer)) == -1)
-					return -1;
-=======
-		while( i < getArgc(entryNames) ){
->>>>>>> e4bf561302c0d96232e228851e7712854a864d38
+		while( i < getArgc(entryNames) )
+		{
 
-			if((entry = searchEntries(entryNames[i], numSector)) == NULL){
+			if((entry = searchEntries(entryNames[i], numSector)) == NULL) 
+			{
 				printf("specified path does not exist\n");
 				return -1;
 			}
@@ -67,7 +67,8 @@ int main(int argc, char** argv) {
 			i++;
 		}
 
-		if(isFile(entry)){
+		if(isFile(entry))
+		{
 
 			/* WHY IS ENTRY->FILENAME SHOWING EXTENSIONS WHEN USING SEARCHENTRIES() */
 
@@ -81,7 +82,8 @@ int main(int argc, char** argv) {
 			else
 			  type = dir;
 
-			for(int i = 0; i < strlen(entry->fileName); i++){
+			for(int i = 0; i < strlen(entry->fileName); i++)
+			{
 				entry->fileName[i] = toupper(entry->fileName[i]);
 				if(entry->fileName[i] == ' ')
 					entry->fileName[i] = '.'; //replace dots with spaces
@@ -92,13 +94,15 @@ int main(int argc, char** argv) {
 			return 0;
 
 		}
-		else {
+		else 
+		{
 			displayDirectory(numSector);
 			return 0;
 		}
 
 	}
-	else { 
+	else 
+	{ 
 
 		displayDirectory(numSector);
 	}
@@ -119,14 +123,16 @@ void displayDirectory(int numSector){
 
 	/* Only read in floppy if argument = 1 or is directory */
 	FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
-	if (FILE_SYSTEM_ID == NULL) {
+	if (FILE_SYSTEM_ID == NULL) 
+	{
 	  printf("Could not open the floppy drive or image.\n");
 	  exit(1);
 	}
 
 	char *buffer = (char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
 
-	if (read_sector(numSector, buffer) == -1) {
+	if (read_sector(numSector, buffer) == -1) 
+	{
 		printf("Something has gone wrong -- could not read the sector\n");
 		return;
 	}
@@ -135,7 +141,8 @@ void displayDirectory(int numSector){
 	int offset = 0;
 	FileData *nEntry, *entry;
 	
-	for(int i = 0; i < 16; i++){ // 16 entries per sector
+	for(int i = 0; i < 16; i++) // 16 entries per sector
+	{ 
 
 		entry = nEntry; //to reset values, spaghettiiiiiii
 

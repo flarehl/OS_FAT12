@@ -44,6 +44,8 @@ void displayLs(FileData*);
 
 int getArgc(char**);
 
+bool isFull(char*);
+
 //arguments are char* for filenames, not Entry
 
 

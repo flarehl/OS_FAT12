@@ -8,7 +8,8 @@ int main(int argc, char**argv){
 	memset(CPATH.path, '\0', MAX_PATH);
 	memcpy(&CPATH, shPtr, SHMEMSIZE); //read in from shared memory
 
-	if(argc == 2){
+	if(argc == 2)
+	{
 
 		char** entryNames;
 		int i = 0,
@@ -24,9 +25,11 @@ int main(int argc, char**argv){
 
 		entryNames = parsePath(argv[1]);
 
-		while( i < getArgc(entryNames) ){
+		while( i < getArgc(entryNames) )
+		{
 
-			if((entry = searchEntries(entryNames[i], numSector)) == NULL){
+			if((entry = searchEntries(entryNames[i], numSector)) == NULL)
+			{
 				printf("specified path does not exist\n");
 				return -1;
 			}
@@ -39,10 +42,12 @@ int main(int argc, char**argv){
 			i++;
 		}
 
-		if(isFile(entry)){
+		if(isFile(entry))
+		{
 			
 			FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
-			if (FILE_SYSTEM_ID == NULL) {
+			if (FILE_SYSTEM_ID == NULL) 
+			{
 			  printf("Could not open the floppy drive or image.\n");
 			  exit(1);
 			}
@@ -56,17 +61,21 @@ int main(int argc, char**argv){
 			if(entry->fileSize > 512)
 				fat = readFAT12Table(1);
 
-			for(int k = 0; k < numLoop; k++){
+			for(int k = 0; k < numLoop; k++)
+			{
 
 				memset(buffer, '\0', BYTES_PER_SECTOR);
 
-				if (read_sector(numSector, buffer) == -1) {
+				if (read_sector(numSector, buffer) == -1) 
+				{
 					printf("Something has gone wrong -- could not read the sector\n");
 					exit(1);
 				}
-				else{
+				else
+				{
 					printf("%s\n", buffer);
-					if(entry->fileSize > 512){
+					if(entry->fileSize > 512)
+					{
 						fatEntryNum = get_fat_entry(fatEntryNum, fat); 
 						numSector = fatEntryNum + 31;
 					}
@@ -77,13 +86,15 @@ int main(int argc, char**argv){
 			return 0;
 
 		}
-		else {
+		else 
+		{
 			printf("entry must be a file\n");
 			return -1;
 		}
 
 	}
-	else { 
+	else 
+	{ 
 
 		printf("wrong number of arguments for cat\n");
 		return -1;

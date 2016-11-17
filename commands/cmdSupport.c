@@ -566,10 +566,10 @@ char* fileTranslate(char* fileName){
 
 
 /******************************************************************************
-* itemExists
+* getSectorOffset
 *
 * compare's user input with the current sector to find if a file or directory
-* exists
+* exists and gets the current location in the buffer for the entry
 *
 * itemName: the name of the file or directory that is being searched for
 * directory: the current sector of the directory being searched
@@ -585,7 +585,8 @@ int getSectorOffset(char *itemName, unsigned char *directory)
     bool fileExists = FALSE;
     int i, j;
     int currentItemNameSize; //needed to keep track of the actaul size of the
-        //item being checked
+    //item being checked
+
     //tried this (holder>= (char)0x41 && holder <= (char)0x5A) || (holder>= (char)0x30 & holder <= (char)0x39)
     for(i = 0; i < 16; i++)
     {
@@ -594,16 +595,19 @@ int getSectorOffset(char *itemName, unsigned char *directory)
             for(j = 0; j < 8; j++) //This loop gets the file name
             {
                holder = (char ) directory[currentOffset +j];
+
                 if(holder <(char)0x30 || holder > (char)0x5B) //This should jump over any whitespace
                 {
-		  // continue;
+                    // continue;
                 }
                 else
                 {
                    currentItemName[currentItemNameSize] = holder;
                    currentItemNameSize++;
                 }
+
             }
+
             //do we need to put a dot insert here?
             for(j = 0; j < 3; j++) //this loop gets the extention
             {
@@ -611,7 +615,7 @@ int getSectorOffset(char *itemName, unsigned char *directory)
             
                 if(holder <(char)0x30 || holder > (char)0x5B)
                 {
-		  // continue;
+                    // continue;
                 }
                 else
                 {
@@ -624,7 +628,7 @@ int getSectorOffset(char *itemName, unsigned char *directory)
             if(strcmp(currentItemName, itemName) == 0)
             {
                 fileExists = TRUE;
-		printf("Found!");
+                printf("Found!");
             }
             else
             {
@@ -633,7 +637,7 @@ int getSectorOffset(char *itemName, unsigned char *directory)
             
             memset(currentItemName, 0, 12);
             
-	    currentItemNameSize = 0;
+            currentItemNameSize = 0;
         }
         
     }
@@ -651,6 +655,15 @@ int getSectorOffset(char *itemName, unsigned char *directory)
  
 }
 
+
+/******************************************************************************
+* displayLs
+*
+* formats and displays entry information in a given directory
+*
+* entry: the entry to display
+*  
+*****************************************************************************/
 void displayLs(FileData* entry){
 
    //*space delimit to get rid of padding for file name and concatenate with dot before extension 
@@ -675,7 +688,15 @@ void displayLs(FileData* entry){
 
 }
 
-
+/******************************************************************************
+* getArgc
+*
+* calculates the number of strings in 
+*
+* args: the arguments to count
+*  
+* Return: the number of arguments in args
+*****************************************************************************/
 int getArgc(char** args){
 
    int i = 0;
@@ -685,4 +706,18 @@ int getArgc(char** args){
    }
 
    return i;
+}
+
+
+/******************************************************************************
+* isFull
+*
+* checks if given directory 
+*
+* args: the arguments to count
+*  
+* Return: the number of arguments in args
+*****************************************************************************/
+bool isFull(char* dir){
+
 }

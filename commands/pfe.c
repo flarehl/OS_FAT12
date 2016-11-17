@@ -14,24 +14,25 @@ int main(int argc, char** argv) {
 	if(argc != 3)
 		printf("Error: pfe only accepts 2 arguments\n");
 
-	//validate if arguments are char, cast to int should handle it??
-
 	// argument validation - in fatSupport
-	if ( checkRange( atoi(argv[1]), atoi(argv[2]) ) ) {
+	if ( checkRange( atoi(argv[1]), atoi(argv[2]) ) ) 
+	{
 
 		fatBuffer = readFAT12Table(1);
 
 		//display results
 		for(int i = atoi(argv[1]); i <= atoi(argv[2]); i++)
 			printf( "Entry %d: %x\n", i, get_fat_entry(i, fatBuffer) );
-		
-		return 0;
+
 
 	}
-	else {
+	else 
+	{
 		printf("%s\n", "Error: Invalid argument(s)\n");
 		exit(1);
-	}
+	}		
+		
+	return 0;
 
 }
 

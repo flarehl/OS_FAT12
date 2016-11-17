@@ -10,7 +10,8 @@ int readBootSector();
 /* Main */
 int main(int argc, char** argv) {
 
-	if(argc != 1){
+	if(argc != 1)
+	{
 		printf("Too many arguments\n");
 		exit(1);
 	}

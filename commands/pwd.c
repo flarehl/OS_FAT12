@@ -6,9 +6,10 @@ int main(int argc, char** argv) {
 	void *shPtr;
 	CurrentPath cPath;
 
-	if(argc != 1){
+	if(argc != 1)
+	{
 		printf("wrong number of arguments\n");
-		exit(-1);
+		return -1;
 	}
 	
 	accessShmem(&shPtr); //passing address of the pointer, int value

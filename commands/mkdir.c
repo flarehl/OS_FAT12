@@ -8,7 +8,8 @@ int main(int argc, char**argv){
 	memset(CPATH.path, '\0', MAX_PATH);
 	memcpy(&CPATH, shPtr, SHMEMSIZE); //read in from shared memory
 
-	if(argc == 2){
+	if(argc == 2)
+	{
 
 		char** entryNames;
 		int i = 0,
@@ -24,16 +25,30 @@ int main(int argc, char**argv){
 
 		entryNames = parsePath(argv[1]);
 
-		while( i < getArgc(entryNames) ){
+		while( i < getArgc(entryNames) )
+		{
 
-			if((entry = searchEntries(entryNames[i], numSector)) == NULL && i == (getArgc(entryNames) - 1) ){
+			if((entry = searchEntries(entryNames[i], numSector)) == NULL && i == (getArgc(entryNames) - 1) )
+			{
 				
 				//directory does not exist, create new directory
 				//see project_spec for steps
+
+				//if the directory has 16 entries, then directory is full
+				//check disk space, then allocate another sector otherwise error message
+				//don't forget to update the fat entries 
+				//read fat12 table and look for unreserved entry to start
+
+				if( getSectorOffset(entryNames[i], entry->flc)
+				{
+					
+				}
+
 				return 0;
 
 			}
-			else if((entry = searchEntries(entryNames[i], numSector)) != NULL && i != (getArgc(entryNames) - 1)){
+			else if((entry = searchEntries(entryNames[i], numSector)) != NULL && i != (getArgc(entryNames) - 1))
+			{
 
 				if(entry->flc == 0)
 					numSector = 19;
@@ -42,7 +57,8 @@ int main(int argc, char**argv){
 					
 				i++;
 			}
-			else{
+			else
+			{
 				printf("entry already exists\n");
 				return -1;
 			}
@@ -50,7 +66,8 @@ int main(int argc, char**argv){
 		}
 
 	}
-	else { 
+	else 
+	{ 
 
 		printf("wrong number of arguments for mkdir\n");
 		return -1;
