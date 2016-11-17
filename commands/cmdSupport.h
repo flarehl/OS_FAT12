@@ -27,12 +27,11 @@ int write_sector(int sector_number, unsigned char* buffer);
 
 /*Functions added by HLeo */
 int            getPhysSector(int);
-bool           isAbsolutePath(char*);
 bool           isDeleted(FileData*);
 bool           isEmpty(FileData*);
 bool           isFile(FileData*);
 bool           isLongFile(FileData*);
-bool           isRelativePath(char*);
+bool           isReserved(FileData*);
 int            itemExists(char*, unsigned char*);
 char**         parsePath(char*);
 FileData*      readEntry(char*, int*);
@@ -41,6 +40,9 @@ FileData*      searchEntries(char*, int);
 char*          fileTranslate(char*);
 int            getSectorOffset(char *itemName, unsigned char *directory);
 
+void displayLs(FileData*);
+
+int getArgc(char**);
 
 //arguments are char* for filenames, not Entry
 

@@ -10,7 +10,6 @@ int main(int argc, char** argv) {
 
 
 	void *shPtr;
-	char rDir[] = "ROOT/";
 	char slash[] = "/";
 
 	accessShmem(&shPtr); //passing address of the pointer, int value
@@ -27,7 +26,7 @@ int main(int argc, char** argv) {
 	//if argument is blank
 	if(argc == 1){ 
 		memset(CPATH.path, '\0', sizeof(CPATH.path));
-		strncpy(CPATH.path, rDir, 5);		
+		strncpy(CPATH.path, slash, 1);		
 		CPATH.sectorNum = 0;
 		memcpy(shPtr, &CPATH, SHMEMSIZE); 
 		return 0;
@@ -61,15 +60,13 @@ int main(int argc, char** argv) {
 				}
 
 				CPATH.sectorNum = entry->flc; //set to previous sector
-
-				if(strcmp(parsed[0], "ROOT") != 0)
-					strcat(CPATH.path, slash); // slashes added before ROOT in this case
+				strcat(CPATH.path, slash); 
 
 				i = 0;
 				// recreate CPATH
 				while(parsed != NULL){
 
-					if(strcmp(last, parsed[i]) != 0 || strcmp(last, "ROOT") == 0 ){
+					if(strcmp(last, parsed[i]) != 0){
 						strcat(CPATH.path, parsed[i]);
 						strcat(CPATH.path, slash);
 					}

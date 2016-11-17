@@ -42,7 +42,33 @@ int main(int argc, char **argv)
     
     if(directorySector->fileName[0] != 0x00)
     {
-        fatEntryNumber = get_fat_entry(directorySector->flc, fat);
+        if(directorySector->fileAttributes == (char)0x10)
+        {
+            
+            fatEntryNumber = get_fat_entry(directorySector->flc, fat);
+            while(fatEntryNumber != 0xFFF)
+            {
+                set_fat_entry(fatEntryNumber, 0x000, fat);
+                currentSectorNum = fatEntryNumber;
+                fatEntryNumber = get_fat_entry(currentSectorNum, fat);
+            }
+            set_fat_entry(fatEntryNumber, 0x000, fat);
+            
+            offset = getSectorOffset(parsedPath, directory);
+            
+            if(offset == -1)
+            {
+                printf("rmdir had problems opening the directory entry.");
+            }
+            
+            directory[offset] = 0xE5;
+            write_sector((long)CPATH.path, directory);
+        }
+        else
+        {
+            printf("The file you entered doesn't exist.");
+            exit(0);
+        }
         
     }
     
