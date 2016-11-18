@@ -26,3 +26,5 @@ Available Commands:
 	rmdir x: removes a specified directory x
 
 	touch x: creates a file in specified path x
+
+To compile simply run the ./setup.bash file, this will also make fresh copies of the floppies and start the shell. To start the shell without recompiling and refreshing the floppies run ./fat12 .
