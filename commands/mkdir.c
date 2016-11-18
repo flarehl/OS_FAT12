@@ -30,7 +30,7 @@ int main(int argc, char**argv){
 		if( getArgc(entryNames) == 1 )
 		{
 			// search current CPATH and create mkdir there, meaning
-			// there should be a function that deals with 
+			// there should be a function that deals with the actual creation
 
 		}
 

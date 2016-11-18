@@ -247,7 +247,8 @@ char* fileTranslate(char* fileName)
 *
 * finds the first unreserved entry 
 *
-* 
+* numSector: the sector number that should be read to find the 
+*        unreserved space
 *  
 * Return: the sector value for the first unreserved entry
 *****************************************************************************/
