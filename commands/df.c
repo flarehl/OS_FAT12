@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "cmdSupport.h"
 
-#define TOTAL_CLUSTERS 
+#define TOTAL_CLUSTERS 2880
 
 int main(int argc, char *argv)
 {
@@ -29,8 +29,8 @@ int main(int argc, char *argv)
     
     percentage = TOTAL_CLUSTERS / clusterCount;
     
-    printf("512K-Blocks     Used    Avalable    Use %\n");
-    printf("%n  %n  %n  %f",TOTAL_CLUSTERS, (TOTAL_CLUSTERS - clusterCount), clusterCount, percentage);
+    printf("512K-Blocks     Used    Avalable    Use \n");
+    printf("%i      %i     %i     %f \n",TOTAL_CLUSTERS, (TOTAL_CLUSTERS - clusterCount), clusterCount, percentage);
     
     return 0;
 }
