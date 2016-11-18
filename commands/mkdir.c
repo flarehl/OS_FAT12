@@ -14,7 +14,7 @@ int main(int argc, char**argv){
 		char** entryNames;
 		int i = 0,
 		    numSector = CPATH.sectorNum; //for relative path handling
-		FileData* entry;
+		FileData* entry, *entryBefore;
 
 		//translate to physical sec num
 		if(CPATH.sectorNum == 0)
@@ -25,30 +25,37 @@ int main(int argc, char**argv){
 
 		entryNames = parsePath(argv[1]);
 
+
+		if( getArgc(entryNames) == 1 )
+		{
+			// search current CPATH and create mkdir there, meaning
+			// there should be a function that deals with 
+
+		}
+
+
 		while( i < getArgc(entryNames) )
 		{
 
 			if((entry = searchEntries(entryNames[i], numSector)) == NULL && i == (getArgc(entryNames) - 1) )
 			{
 				
-				//directory does not exist, create new directory
-				//see project_spec for steps
-
-				//if the directory has 16 entries, then directory is full
-				//check disk space, then allocate another sector otherwise error message
-				//don't forget to update the fat entries 
-				//read fat12 table and look for unreserved entry to start
-
-				if( getSectorOffset(entryNames[i], entry->flc)
+				if( isFull(entryBefore) )
 				{
-					
+					// reallocate space for another sector if unreserved is available
+					// otherwise see below
 				}
+
+				//otherwise find unreserved entry in FAT table
+					//read FAT first or handle in findUnreserved??
+
 
 				return 0;
 
 			}
 			else if((entry = searchEntries(entryNames[i], numSector)) != NULL && i != (getArgc(entryNames) - 1))
 			{
+				entryBefore = entry;
 
 				if(entry->flc == 0)
 					numSector = 19;
