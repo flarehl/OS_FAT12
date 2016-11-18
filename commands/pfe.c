@@ -10,6 +10,7 @@ bool checkRange(int x, int y);
 int main(int argc, char** argv) {
 
 	unsigned char* fatBuffer;
+	int i;
 
 	if(argc != 3)
 		printf("Error: pfe only accepts 2 arguments\n");
@@ -21,7 +22,7 @@ int main(int argc, char** argv) {
 		fatBuffer = readFAT12Table(1);
 
 		//display results
-		for(int i = atoi(argv[1]); i <= atoi(argv[2]); i++)
+		for(i = atoi(argv[1]); i <= atoi(argv[2]); i++)
 			printf( "Entry %d: %x\n", i, get_fat_entry(i, fatBuffer) );
 
 

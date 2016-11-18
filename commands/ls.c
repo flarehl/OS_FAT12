@@ -82,7 +82,8 @@ int main(int argc, char** argv) {
 			else
 			  type = dir;
 
-			for(int i = 0; i < strlen(entry->fileName); i++)
+			int i;
+			for(i = 0; i < strlen(entry->fileName); i++)
 			{
 				entry->fileName[i] = toupper(entry->fileName[i]);
 				if(entry->fileName[i] == ' ')
@@ -138,10 +139,10 @@ void displayDirectory(int numSector){
 	}
 
 
-	int offset = 0;
+	int offset = 0, i;
 	FileData *nEntry, *entry;
 	
-	for(int i = 0; i < 16; i++) // 16 entries per sector
+	for(i = 0; i < 16; i++) // 16 entries per sector
 	{ 
 
 		entry = nEntry; //to reset values, spaghettiiiiiii

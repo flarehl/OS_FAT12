@@ -60,8 +60,9 @@ int main(int argc, char**argv){
 
 			if(entry->fileSize > 512)
 				fat = readFAT12Table(1);
-
-			for(int k = 0; k < numLoop; k++)
+			
+			int k;
+			for(k = 0; k < numLoop; k++)
 			{
 
 				memset(buffer, '\0', BYTES_PER_SECTOR);

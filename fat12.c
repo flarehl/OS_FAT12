@@ -1,5 +1,5 @@
 /*
-Author: Hanah Leo		
+Author: Hanah Leo & Stephen Brikiatis		
 Class:  CSI-385-01
 Assignment: FAT12 Implementation
 Date Assigned: Start of semester
