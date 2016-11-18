@@ -18,7 +18,7 @@ bool accessShmem(void **ptr)
 	char *shPtr;
 
 	//find shared mem
-	shmid = shmget(SHMEMKEY, SHMEMSIZE, 0644);
+	shmid = shmget(SHMEMKEY, SHMEMSIZE, 0777);
 	if( shmid < 0 ){
 		perror("shmget");
 		return FALSE;
@@ -60,7 +60,7 @@ bool createShmem(void **ptr)
 	char *shPtr;
 
 	//create shared mem w/ error check
-	shmid = shmget(SHMEMKEY, SHMEMSIZE, 0644 | IPC_CREAT);
+	shmid = shmget(SHMEMKEY, SHMEMSIZE, 0777 | IPC_CREAT);
 	if( shmid < 0 )
 	{
 		perror("main shmget");
