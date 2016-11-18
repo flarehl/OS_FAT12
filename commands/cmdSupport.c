@@ -228,8 +228,9 @@ void displayLs(FileData* entry)
 *****************************************************************************/
 char* fileTranslate(char* fileName)
 {
-
-   for(int i = 0; i < strlen(fileName); i++)
+    int i;
+    
+   for(i = 0; i < strlen(fileName); i++)
    {
 
       fileName[i] = toupper(fileName[i]);
@@ -357,7 +358,7 @@ int getSectorOffset(char *itemName, unsigned char *directory)
             }
            
             
-            if(strcmp(currentItemName, itemName) == 0)
+            if(strcmp(currentItemName, itemName) == 0) //comparing the two strings
             {
                 fileExists = TRUE;
                 printf("Found!");
@@ -365,6 +366,7 @@ int getSectorOffset(char *itemName, unsigned char *directory)
             else
             {
                 currentOffset = currentOffset + 0x20;
+                //simple increase of the offset to the next position
             }
             
             memset(currentItemName, 0, 12);
@@ -464,6 +466,7 @@ bool isFull(FileData* dir)
     //*space delimit to get rid of padding for file name and concatenate with dot before extension 
     char* name = strtok(dir->fileName, " ");
     FileData* entry;
+    int i;
 
     if(dir->fileExt[0] != (char)0x20) //as long as extension is not blank
     {
@@ -472,7 +475,7 @@ bool isFull(FileData* dir)
         strcat(name, dir->fileExt);
     }
 
-    for(int i = 0; i < 16; i++)
+    for(i = 0; i < 16; i++)
     {
         if((entry = searchEntries(name, dir->flc)) == NULL)
             return FALSE;
@@ -538,6 +541,7 @@ char** parsePath(char* path)
    char** args = (char**)malloc(DEFAULT_BUF_SIZE * sizeof(char));
    int location = 0,
       bufSize = DEFAULT_BUF_SIZE;
+   int i;
 
    token = strtok(path, slashDelim);
    if( token == NULL )
@@ -547,7 +551,7 @@ char** parsePath(char* path)
    while(token!= NULL)
    {
 
-        for(int i = 0; i < strlen(token); i++)
+        for(i = 0; i < strlen(token); i++)
             token[i] = toupper(token[i]);
 
         args[location] = token;
@@ -682,6 +686,7 @@ unsigned char* readFAT12Table(int FAT_Number)
 {
 
    unsigned char* fat = (unsigned char*)malloc( 9 * BYTES_PER_SECTOR * sizeof(unsigned char) );
+   int i;
 
    FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
 
@@ -693,12 +698,12 @@ unsigned char* readFAT12Table(int FAT_Number)
 
    // i is 0-numSectors, fat holds the data
    if (FAT_Number == 1) {
-      for (int i = 0; i < 9; i++) 
+      for (i = 0; i < 9; i++) 
          read_sector(i + 1, &fat[i * BYTES_PER_SECTOR]);
       return fat;
    }
    else if (FAT_Number == 2) {
-      for (int i = 10; i < 19; i++)
+      for (i = 10; i < 19; i++)
          read_sector(i + 1, &fat[i * BYTES_PER_SECTOR]);
       return fat;
    }
@@ -726,6 +731,7 @@ FileData* searchEntries(char* fileName, int numSector)
     FileData *nEntry; //used as empty value
     FileData *entry;
     int offset = 0;
+    int i;
 
     FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
     if (FILE_SYSTEM_ID == NULL) 
@@ -748,7 +754,7 @@ FileData* searchEntries(char* fileName, int numSector)
     }
 
     /*put in do while loop to deal with directories spanning multiple sectors*/
-    for(int i = 0; i < 16; i++) // 16 entries per sector
+    for(i = 0; i < 16; i++) // 16 entries per sector
     {
 
         entry = nEntry; 

@@ -16,13 +16,13 @@ int main(int argc, char *argv)
         exit(-1);
     }
     
-    fatEntry = readFAT12Table(1);
+    fatEntry = readFAT12Table(1); //called form cmdSupppot.c
     
     for(i=1; i <= TOTAL_CLUSTERS; i++)
     {
         currentEntry = get_fat_entry(i, fatEntry);
         
-        if(currentEntry == 0x000)
+        if(currentEntry == 0x000) //This is the only entry type for an empty sector
         {
             clusterCount++;
         }
