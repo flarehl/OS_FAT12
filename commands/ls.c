@@ -46,13 +46,11 @@ int main(int argc, char** argv) {
 
 
 		entryNames = parsePath(argv[1]);
-
-<<<<<<< HEAD
+		
 				if((numSector = getSectorOffset(tmp[i], buffer)) == -1)
-					return -1;
-=======
+					return -1
+					  
 		while( i < getArgc(entryNames) ){
->>>>>>> e4bf561302c0d96232e228851e7712854a864d38
 
 			if((entry = searchEntries(entryNames[i], numSector)) == NULL){
 				printf("specified path does not exist\n");
