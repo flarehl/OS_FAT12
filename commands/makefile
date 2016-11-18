@@ -1,4 +1,4 @@
-command: shmem.o cmdSupport.o pbs.o pfe.o ls.o cd.o pwd.o rm.o cat.o mkdir.o df.o
+command: shmem.o cmdSupport.o pbs.o pfe.o ls.o cd.o pwd.o rm.o cat.o mkdir.o
 	gcc -o pbs pbs.o cmdSupport.o
 	gcc -o pfe pfe.o cmdSupport.o 
 	gcc -o ls ls.o cmdSupport.o shmem.o
@@ -7,7 +7,6 @@ command: shmem.o cmdSupport.o pbs.o pfe.o ls.o cd.o pwd.o rm.o cat.o mkdir.o df.
 	gcc -o rm rm.o cmdSupport.o shmem.o
 	gcc -o cat cat.o cmdSupport.o shmem.o
 	gcc -o mkdir mkdir.o cmdSupport.o shmem.o
-	gcc -o df df.o cmdSupport.o shmem.o
 
 shmem.o: ../utilities/shmem.c ../utilities/shmem.h
 	gcc -c ../utilities/shmem.c
@@ -43,5 +42,5 @@ cat.o: cat.c cmdSupport.h ../utilities/shmem.h
 mkdir.o: mkdir.c cmdSupport.h ../utilities/shmem.h
 	gcc -c mkdir.c cmdSupport.c ../utilities/shmem.c
 
-df.o: df.c cmdSupport.h
-	gcc -c df.c cmdSupport.c
+rm: rm.c
+	gcc -o rm rm.c cmdSupport.c ../utilities/shmem.c -I.
