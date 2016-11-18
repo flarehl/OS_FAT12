@@ -357,7 +357,7 @@ int getSectorOffset(char *itemName, unsigned char *directory)
             }
            
             
-            if(strcmp(currentItemName, itemName) == 0)
+            if(strcmp(currentItemName, itemName) == 0) //comparing the two strings
             {
                 fileExists = TRUE;
                 printf("Found!");
@@ -365,6 +365,7 @@ int getSectorOffset(char *itemName, unsigned char *directory)
             else
             {
                 currentOffset = currentOffset + 0x20;
+                //simple increase of the offset to the next position
             }
             
             memset(currentItemName, 0, 12);
