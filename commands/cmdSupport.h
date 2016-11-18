@@ -25,27 +25,23 @@ int read_sector(int sector_number, unsigned char* buffer);
 int write_sector(int sector_number, unsigned char* buffer);
 
 
-/*Functions added by HLeo */
+/* Functions added by HLeo & SBrikiatis */
+
+void           displayLs(FileData*);
+char*          fileTranslate(char*);
+int            findUnreserved(int); //Work in Progress 
+int            getArgc(char**);
 int            getPhysSector(int);
+int            getSectorOffset(char *itemName, unsigned char *directory);
 bool           isDeleted(FileData*);
 bool           isEmpty(FileData*);
 bool           isFile(FileData*);
+bool           isFull(FileData*);
 bool           isLongFile(FileData*);
 bool           isReserved(FileData*);
-int            itemExists(char*, unsigned char*);
 char**         parsePath(char*);
 FileData*      readEntry(char*, int*);
 unsigned char* readFAT12Table(int FAT_Number);
 FileData*      searchEntries(char*, int);
-char*          fileTranslate(char*);
-int            getSectorOffset(char *itemName, unsigned char *directory);
-
-void displayLs(FileData*);
-
-int getArgc(char**);
-
-//arguments are char* for filenames, not Entry
-
-
 
 #endif

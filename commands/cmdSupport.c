@@ -181,6 +181,104 @@ void set_fat_entry(int fat_entry_number, int value, unsigned char* fat)
 
 
 
+/******************************************************************************
+* displayLs
+*
+* formats and displays entry information in a given directory
+*
+* entry: the entry to display
+*  
+*****************************************************************************/
+void displayLs(FileData* entry)
+{
+
+   //*space delimit to get rid of padding for file name and concatenate with dot before extension 
+   char* name = strtok(entry->fileName, " ");
+   if(entry->fileExt[0] != ' ')
+   {
+      char dot[] = "."; //strcat doesnt play well with 
+      strcat(name, dot);
+   }
+
+   //wrap into char* getType() later
+   char file[] = "file";
+   char dir[] = "dir";
+
+   char* type;
+   if(isFile(entry))
+      type = file;
+   else
+      type = dir;
+   
+
+   printf("%-13s %7s %12d %6d\n", strcat(name, entry->fileExt), type, entry->fileSize, entry->flc);
+
+}
+
+
+/******************************************************************************
+* fileTranslate
+*
+* translates given filename to all caps and replaces any dots with spaces
+*
+* fileName: the file name to be translated
+*
+* Return: if entry does not exist, returns FileData object with blank 
+*         file name
+*****************************************************************************/
+char* fileTranslate(char* fileName)
+{
+
+   for(int i = 0; i < strlen(fileName); i++)
+   {
+
+      fileName[i] = toupper(fileName[i]);
+      if(fileName[i] == '.')
+         fileName[i] = ' '; //replace dots with spaces
+
+   }
+
+   return fileName;
+
+}
+
+/******************************************************************************
+* findUnreserved
+*
+* finds the first unreserved entry 
+*
+* 
+*  
+* Return: the sector value for the first unreserved entry
+*****************************************************************************/
+int findUnreserved(int numSector)
+{
+
+
+    return 0;
+}
+
+
+/******************************************************************************
+* getArgc
+*
+* calculates the number of strings in 
+*
+* args: the arguments to count
+*  
+* Return: the number of arguments in args
+*****************************************************************************/
+int getArgc(char** args)
+{
+    int i = 0;
+
+    while(args[i] != NULL)
+    {
+        i++;
+    }
+
+    return i;
+}
 
 /******************************************************************************
 * getPhysSector
@@ -191,8 +289,101 @@ void set_fat_entry(int fat_entry_number, int value, unsigned char* fat)
 *
 * Return: physical sector num
 *****************************************************************************/
-int getPhysSector(int logicalNum){
+int getPhysSector(int logicalNum)
+{
    return logicalNum + 31;
+}
+
+
+
+/******************************************************************************
+* getSectorOffset
+*
+* compare's user input with the current sector to find if a file or directory
+* exists and gets the current location in the buffer for the entry
+*
+* itemName: the name of the file or directory that is being searched for
+* directory: the current sector of the directory being searched
+*  
+* Return: the current offset in the buffer, otherwise returns -1
+*****************************************************************************/
+int getSectorOffset(char *itemName, unsigned char *directory)
+{
+    char currentItemName[12];
+    char userInput[12];
+    char holder;
+    int currentOffset = 0x00;
+    bool fileExists = FALSE;
+    int i, j;
+    int currentItemNameSize; //needed to keep track of the actaul size of the
+    //item being checked
+
+    //tried this (holder>= (char)0x41 && holder <= (char)0x5A) || (holder>= (char)0x30 & holder <= (char)0x39)
+    for(i = 0; i < 16; i++)
+    {
+        if(fileExists == FALSE)
+        {
+            for(j = 0; j < 8; j++) //This loop gets the file name
+            {
+               holder = (char ) directory[currentOffset +j];
+
+                if(holder <(char)0x30 || holder > (char)0x5B) //This should jump over any whitespace
+                {
+                    // continue;
+                }
+                else
+                {
+                   currentItemName[currentItemNameSize] = holder;
+                   currentItemNameSize++;
+                }
+
+            }
+
+            //do we need to put a dot insert here?
+            for(j = 0; j < 3; j++) //this loop gets the extention
+            {
+                holder = directory[currentOffset + 8 + j];
+            
+                if(holder <(char)0x30 || holder > (char)0x5B)
+                {
+                    // continue;
+                }
+                else
+                {
+                    currentItemName[currentItemNameSize] = holder;
+                    currentItemNameSize++;
+                }
+            }
+           
+            
+            if(strcmp(currentItemName, itemName) == 0)
+            {
+                fileExists = TRUE;
+                printf("Found!");
+            }
+            else
+            {
+                currentOffset = currentOffset + 0x20;
+            }
+            
+            memset(currentItemName, 0, 12);
+            
+            currentItemNameSize = 0;
+        }
+        
+    }
+    
+    if(fileExists == FALSE)
+    {
+        printf("Doesn't exist\n");
+        return -1;
+    }
+    else
+    {
+        return currentOffset; //this will pass back the postion the file is at, or
+        //-1 if the file doesn't exist at all
+    }
+ 
 }
 
 
@@ -205,7 +396,8 @@ int getPhysSector(int logicalNum){
 *
 * Return: true if the entry has been deleted, return false otherwise
 *****************************************************************************/
-bool isDeleted(FileData *entry){
+bool isDeleted(FileData *entry)
+{
 
    if(entry->fileName[0] == (char)0xE5)
       return TRUE;
@@ -224,7 +416,8 @@ bool isDeleted(FileData *entry){
 *
 * Return: true if entry is not empty, return false otherwise
 *****************************************************************************/
-bool isEmpty(FileData *entry){
+bool isEmpty(FileData *entry)
+{
 
    if (entry->fileName[0] == (char)0x00 )
       return TRUE; 
@@ -244,12 +437,49 @@ bool isEmpty(FileData *entry){
 *
 * Return: true if entry is a file, return false otherwise
 *****************************************************************************/
-bool isFile(FileData *entry){
+bool isFile(FileData *entry)
+{
 
    if ((entry->fileAttributes & (char)0x10 ) == (char)0x10 )
       return FALSE; 
    else
       return TRUE;
+
+}
+
+
+
+/******************************************************************************
+* isFull
+*
+* checks if given directory's sector is full
+*
+* dir: the directory to check
+*  
+* Return: true if the directory already has 16 entries, false otherwise
+*****************************************************************************/
+bool isFull(FileData* dir)
+{
+    //*space delimit to get rid of padding for file name and concatenate with dot before extension 
+    char* name = strtok(dir->fileName, " ");
+    FileData* entry;
+
+    if(dir->fileExt[0] != (char)0x20) //as long as extension is not blank
+    {
+        char dot[] = "."; 
+        strcat(name, dot);
+        strcat(name, dir->fileExt);
+    }
+
+    for(int i = 0; i < 16; i++)
+    {
+        if((entry = searchEntries(name, dir->flc)) == NULL)
+            return FALSE;
+
+    }
+    
+
+    return TRUE;
 
 }
 
@@ -263,7 +493,8 @@ bool isFile(FileData *entry){
 *
 * Return: true if file entry should be ignored
 *****************************************************************************/
-bool isLongFile(FileData *entry){
+bool isLongFile(FileData *entry)
+{
 
    if(entry->fileAttributes == 0x0f)
       return TRUE;
@@ -281,7 +512,8 @@ bool isLongFile(FileData *entry){
 *
 * Return: return true if first byte of filename is 0xf6
 *****************************************************************************/
-bool isReserved(FileData* entry){
+bool isReserved(FileData* entry)
+{
    if( entry->fileName[0] ==(char)0xf6 )
       return TRUE; //add isExist()
    else
@@ -297,7 +529,8 @@ bool isReserved(FileData* entry){
 *
 * Return: slash delimited "argv"
 *****************************************************************************/
-char** parsePath(char* path){
+char** parsePath(char* path)
+{
 
    //quotes should be stripped by parseInput already if they were included
    char slashDelim[] = "/", *token;
@@ -310,22 +543,24 @@ char** parsePath(char* path){
       return NULL;
 
    // loop through until all tokens are handed off to parsedInput
-   while(token!= NULL){
+   while(token!= NULL)
+   {
 
-      for(int i = 0; i < strlen(token); i++)
-         token[i] = toupper(token[i]);
+        for(int i = 0; i < strlen(token); i++)
+            token[i] = toupper(token[i]);
 
-      args[location] = token;
-      location++;
+        args[location] = token;
+        location++;
 
-      // if the buffer is too small, reallocate space in 50byte increments
-      if(location >= bufSize){
+        // if the buffer is too small, reallocate space in 50byte increments
+        if(location >= bufSize)
+        {
 
-         bufSize += DEFAULT_BUF_SIZE;
-         args = (char**)realloc(args, bufSize * sizeof(char*));
+            bufSize += DEFAULT_BUF_SIZE;
+            args = (char**)realloc(args, bufSize * sizeof(char*));
 
-         //maybe add error handling for reallocation of parsedInput
-      }
+            //maybe add error handling for reallocation of parsedInput
+        }
 
       token = strtok(NULL, slashDelim);
    }
@@ -346,19 +581,22 @@ char** parsePath(char* path){
 *
 * Return: FileData object holding entry info
 *****************************************************************************/
-FileData* readEntry(char* buffer, int *offset){
+FileData* readEntry(char* buffer, int *offset)
+{
 
    FileData* entry;
    entry = (FileData*)malloc(sizeof(FileData));
 
    int i;
-   for(i = 0; i < 8; i++){
+   for(i = 0; i < 8; i++)
+   {
       entry->fileName[i] = buffer[*offset];
       (*offset)++;
    }
    entry->fileName[i] = '\0';
 
-   for(i = 0; i < 3; i++){
+   for(i = 0; i < 3; i++)
+   {
       entry->fileExt[i] = buffer[*offset];          
       (*offset)++;
    }
@@ -373,19 +611,22 @@ FileData* readEntry(char* buffer, int *offset){
 
    *offset += 2;
 
-   for(i = 0; i < 2; i++){
+   for(i = 0; i < 2; i++)
+   {
       entry->createTime[i] = buffer[*offset];
       (*offset)++;
    }
    entry->createTime[i] = '\0';
 
-   for(i = 0; i < 2; i++){
+   for(i = 0; i < 2; i++)
+   {
       entry->createDate[i] = buffer[*offset];
       (*offset)++;
    }
    entry->createDate[i] = '\0';  
 
-   for(i = 0; i < 2; i++){
+   for(i = 0; i < 2; i++)
+   {
       entry->lastAccessDate[i] = buffer[*offset];
       (*offset)++;
    }
@@ -394,14 +635,16 @@ FileData* readEntry(char* buffer, int *offset){
    //ignore 2 bytes here
    (*offset)+=2;
 
-   for(i = 0; i < 2; i++){
+   for(i = 0; i < 2; i++)
+   {
       entry->lastWriteTime[i] = buffer[*offset];
       (*offset)++;
    }
    entry->lastWriteTime[i] = '\0';
 
 
-   for(i = 0; i < 2; i++){
+   for(i = 0; i < 2; i++)
+   {
       entry->lastWriteDate[i] = buffer[*offset];
       (*offset)++;
    }
@@ -430,11 +673,12 @@ FileData* readEntry(char* buffer, int *offset){
 *
 * Reads the FAT12 tables 
 *
-* sectorNumber:  The number of the FAT entry
+* numSector:  The number of the FAT entry
 *
 * return: returns buffer holding fat entries
 *****************************************************************************/
-unsigned char* readFAT12Table(int FAT_Number) {
+unsigned char* readFAT12Table(int FAT_Number) 
+{
 
    unsigned char* fat = (unsigned char*)malloc( 9 * BYTES_PER_SECTOR * sizeof(unsigned char) );
 
@@ -470,219 +714,88 @@ unsigned char* readFAT12Table(int FAT_Number) {
 * searches for the entry
 *
 * fileName: the file name to be searched for
-* sectorNumber: number of the current sector to be read
+* numSector: number of the current sector to be read
 *
 * Return: if entry does not exist, returns FileData object with blank 
 *         file name
 *****************************************************************************/
-FileData* searchEntries(char* fileName, int sectorNumber){
+FileData* searchEntries(char* fileName, int numSector)
+{
 
-   FileData *nEntry; //used as empty value
-   FileData *entry;
-   int offset = 0;
+    FileData *nEntry; //used as empty value
+    FileData *entry;
+    int offset = 0;
 
-   FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
-   if (FILE_SYSTEM_ID == NULL) {
+    FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
+    if (FILE_SYSTEM_ID == NULL) 
+    {
       printf("Could not open the floppy drive or image.\n");
       exit(1);
-   }
+    }
 
-   //read in the appropriate sector set by sectorNumber
-   char *buffer = (char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
-   if (read_sector(sectorNumber, buffer) == -1) {
+    //read in the appropriate sector set by numSector
+    char *buffer = (char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
+    if (read_sector(numSector, buffer) == -1) 
+    {
       printf("Something has gone wrong -- could not read the sector\n");
       exit(1);
-   }
+    }
 
-   if( strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0){
+    if( strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0)
+    {
       fileName = fileTranslate(fileName);
-   }
+    }
 
-   /*put in do while loop to deal with directories spanning multiple sectors*/
+    /*put in do while loop to deal with directories spanning multiple sectors*/
+    for(int i = 0; i < 16; i++) // 16 entries per sector
+    {
 
-      for(int i = 0; i < 16; i++){ // 16 entries per sector
+        entry = nEntry; 
 
-         //reaches here 
-         entry = nEntry; //to reset values, spaghettiiiiiii
-
-         if( (entry = readEntry(buffer, &offset)) == NULL){
+        if( (entry = readEntry(buffer, &offset)) == NULL)
+        {
             printf("Cannot read entry\n");
             break;
-         }
+        }
 
-         if( isEmpty(entry) || isReserved(entry)){
+        if( isEmpty(entry) || isReserved(entry))
+        {
             break; 
-         }
-         else if( isLongFile(entry) || isDeleted(entry) ){
+        }
+        else if( isLongFile(entry) || isDeleted(entry) )
+        {
             continue;
-         }
-         else{
+        }
+        else
+        {
 
             char* name = strtok(entry->fileName, " ");
 
-            if(entry->fileExt[0] != ' '){
-               char space[] = " ";
-               char *ext;
+            if(entry->fileExt[0] != ' ')
+            {
+                char space[] = " ";
+                char *ext;
 
-               ext = strtok(entry->fileExt, space);
-               strcat(name, space);
-               strcat(name, ext);
+                ext = strtok(entry->fileExt, space);
+                strcat(name, space);
+                strcat(name, ext);
             }
 
-            if( strcmp(name, fileName) == 0 ){
-               return entry; 
+            if( strcmp(name, fileName) == 0 )
+            {
+                return entry; 
             }
 
-         }
+        }
 
-      }
+    }
 
    return NULL;
 
 }
 
 
-/******************************************************************************
-* fileTranslate
-*
-* translates given filename to all caps and replaces any dots with spaces
-*
-* fileName: the file name to be translated
-*
-* Return: if entry does not exist, returns FileData object with blank 
-*         file name
-*****************************************************************************/
-char* fileTranslate(char* fileName){
-
-   for(int i = 0; i < strlen(fileName); i++){
-      fileName[i] = toupper(fileName[i]);
-      if(fileName[i] == '.')
-         fileName[i] = ' '; //replace dots with spaces
-   }
-
-   return fileName;
-
-}
 
 
-/******************************************************************************
-* itemExists
-*
-* compare's user input with the current sector to find if a file or directory
-* exists
-*
-* itemName: the name of the file or directory that is being searched for
-* directory: the current sector of the directory being searched
-*  
-* Return: the current offset in the buffer, otherwise returns -1
-*****************************************************************************/
-int getSectorOffset(char *itemName, unsigned char *directory)
-{
-    char currentItemName[12];
-    char userInput[12];
-    char holder;
-    int currentOffset = 0x00;
-    bool fileExists = FALSE;
-    int i, j;
-    int currentItemNameSize; //needed to keep track of the actaul size of the
-        //item being checked
-    //tried this (holder>= (char)0x41 && holder <= (char)0x5A) || (holder>= (char)0x30 & holder <= (char)0x39)
-    for(i = 0; i < 16; i++)
-    {
-        if(fileExists == FALSE)
-        {
-            for(j = 0; j < 8; j++) //This loop gets the file name
-            {
-               holder = (char ) directory[currentOffset +j];
-                if(holder <(char)0x30 || holder > (char)0x5B) //This should jump over any whitespace
-                {
-		  // continue;
-                }
-                else
-                {
-                   currentItemName[currentItemNameSize] = holder;
-                   currentItemNameSize++;
-                }
-            }
-            //do we need to put a dot insert here?
-            for(j = 0; j < 3; j++) //this loop gets the extention
-            {
-                holder = directory[currentOffset + 8 + j];
-            
-                if(holder <(char)0x30 || holder > (char)0x5B)
-                {
-		  // continue;
-                }
-                else
-                {
-                    currentItemName[currentItemNameSize] = holder;
-                    currentItemNameSize++;
-                }
-            }
-           
-            
-            if(strcmp(currentItemName, itemName) == 0)
-            {
-                fileExists = TRUE;
-		printf("Found!");
-            }
-            else
-            {
-                currentOffset = currentOffset + 0x20;
-            }
-            
-            memset(currentItemName, 0, 12);
-            
-	    currentItemNameSize = 0;
-        }
-        
-    }
-    
-    if(fileExists == FALSE)
-    {
-        printf("Doesn't exist\n");
-        return -1;
-    }
-    else
-    {
-        return currentOffset; //this will pass back the postion the file is at, or
-        //-1 if the file doesn't exist at all
-    }
- 
-}
-
-void displayLs(FileData* entry){
-
-   //*space delimit to get rid of padding for file name and concatenate with dot before extension 
-   char* name = strtok(entry->fileName, " ");
-   if(entry->fileExt[0] != ' '){
-      char dot[] = "."; //strcat doesnt play well with 
-      strcat(name, dot);
-   }
-
-   //wrap into char* getType() later
-   char file[] = "file";
-   char dir[] = "dir";
-
-   char* type;
-   if(isFile(entry))
-      type = file;
-   else
-      type = dir;
-   
-
-   printf("%-13s %7s %12d %6d\n", strcat(name, entry->fileExt), type, entry->fileSize, entry->flc);
-
-}
 
 
-int getArgc(char** args){
-
-   int i = 0;
-
-   while(args[i] != NULL){
-      i++;
-   }
-
-   return i;
-}

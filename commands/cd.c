@@ -24,7 +24,8 @@ int main(int argc, char** argv) {
 		numSector += 31;
 
 	//if argument is blank
-	if(argc == 1){ 
+	if(argc == 1)
+	{ 
 		memset(CPATH.path, '\0', sizeof(CPATH.path));
 		strncpy(CPATH.path, slash, 1);		
 		CPATH.sectorNum = 0;
@@ -32,7 +33,8 @@ int main(int argc, char** argv) {
 		return 0;
 
 	}
-	else if(argc == 2){ 
+	else if(argc == 2)
+	{ 
 
 		FileData *entry;
 		CurrentPath tmp;
@@ -43,9 +45,11 @@ int main(int argc, char** argv) {
 		if( (strcmp(argv[1], ".") == 0 || strcmp(argv[1], "..") == 0) && strcmp(CPATH.path, "ROOT") == 0) 
 			printf("user is already in root\n");
 
-		else if(strcmp(argv[1], ".") == 0 || strcmp(argv[1], "..") == 0){
+		else if(strcmp(argv[1], ".") == 0 || strcmp(argv[1], "..") == 0)
+		{
 
-			if((entry = searchEntries(argv[1], numSector)) != NULL && strcmp(argv[1], "..") == 0){
+			if((entry = searchEntries(argv[1], numSector)) != NULL && strcmp(argv[1], "..") == 0)
+			{
 
 				strcpy(tmpPath, CPATH.path); //copy path for memory
 				parsed = parsePath(tmpPath);
@@ -54,7 +58,8 @@ int main(int argc, char** argv) {
 
 				int i = 0;
 				// gets the last filename that needs to be pruned
-				while(parsed[i] != NULL){
+				while(parsed[i] != NULL)
+				{
 					last = parsed[i];
 					i++;
 				}
@@ -64,29 +69,37 @@ int main(int argc, char** argv) {
 
 				i = 0;
 				// recreate CPATH
-				while(parsed != NULL){
+				while(parsed != NULL)
+				{
 
-					if(strcmp(last, parsed[i]) != 0){
+					if(strcmp(last, parsed[i]) != 0)
+					{
 						strcat(CPATH.path, parsed[i]);
 						strcat(CPATH.path, slash);
 					}
+
 					i++;
 					memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c, can be put outside loop??
 
 				}
 
-			} else if(strcmp(argv[1], ".") == 0 ){
+			} 
+			else if(strcmp(argv[1], ".") == 0 )
+			{
 				//do nothing, print the CPATH.path
 			}
 			else
 				printf(". and .. unavailable\n");
 
 		}	
-		else {
+		else 
+		{
 
-			if((entry = searchEntries(argv[1], numSector)) != NULL){
+			if((entry = searchEntries(argv[1], numSector)) != NULL)
+			{
 
-				if( !isFile(entry) ){
+				if( !isFile(entry) )
+				{
 
 					strcat(CPATH.path, argv[1]);
 					strcat(CPATH.path, slash);

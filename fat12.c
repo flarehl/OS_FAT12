@@ -44,7 +44,8 @@ int main(int argc, char **argv)
 		if(args == NULL)
 			continue;
 
-		if( (strncmp(args[0], "exit", 4) == 0) || (strncmp(args[0], "logout", 6) == 0) ){
+		if( (strncmp(args[0], "exit", 4) == 0) || (strncmp(args[0], "logout", 6) == 0) )
+		{
 			status = 1;
 			continue;
 		}

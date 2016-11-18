@@ -7,27 +7,32 @@
  *
  * Return: the user input
  ****************************************************************************/
-void executeCmd(char **args) {
+void executeCmd(char **args) 
+{
 	pid_t  pid;
 	int    status;
 
 	char command[] = "./commands/";
 
 
-	if ((pid = fork()) < 0) {     // fork a child
+	if ((pid = fork()) < 0)  // fork a child
+	{    
 		printf("Error forking child process\n");
 		exit(1);
 	} 
-	else if (pid == 0) {          //do stuff in child
+	else if (pid == 0)  //do stuff in child
+	{         
 
 		//use switch statement for different commands??
-		if (execvp( strcat(command,args[0]), args ) < 0) {    
+		if (execvp( strcat(command,args[0]), args ) < 0) 
+		{    
 			printf("%s: Command does not exist\n", args[0]);
 			exit(1);
 		}
 
 	} 
-	else {                                  
+	else 
+	{                                  
 	  while (wait(&status) != pid);  //wait until child process ends
 	}
 }
@@ -40,12 +45,13 @@ void executeCmd(char **args) {
  *
  * Return: the user input
  ****************************************************************************/
-char* getInput(CurrentPath cwd){
+char* getInput(CurrentPath cwd)
+{
 
 	char* userInput = NULL;
 	ssize_t inputSize = 0;
 	
-	printf(">"); //add path before > later
+	printf(">");
 	getline(&userInput, &inputSize, stdin);
 
 	return userInput;
@@ -61,7 +67,8 @@ char* getInput(CurrentPath cwd){
  *
  * Return: a custom argv alternative with commands and args
  ****************************************************************************/
-char** parseInput(char* input){
+char** parseInput(char* input)
+{
 
 	int location = 0, 
 		bufSize = DEFAULT_BUF_SIZE,
@@ -78,7 +85,8 @@ char** parseInput(char* input){
 	char** parsedInput = (char**)malloc(DEFAULT_BUF_SIZE* sizeof(char));
 
 	//strip single/double quotes
-	if( strstr(input, quoteDelim) != NULL ) {
+	if( strstr(input, quoteDelim) != NULL ) 
+	{
 
 		holder = buffer; //why? idk
 
@@ -88,17 +96,18 @@ char** parseInput(char* input){
 
 
 		// loop through until all tokens are handed off to parsedInput
-		while(token != NULL){
+		while(token != NULL)
+		{
 
 			//wait to use strcat bc need to check for buffer realloc first
 			bufLoc += strlen(token);
 
 			/* if the buffer is too small, reallocate space in 50byte increments */
-			if(bufLoc >= bufSize){
+			if(bufLoc >= bufSize)
+			{
 
 				bufSize += DEFAULT_BUF_SIZE;
 				holder = (char*)realloc(holder, bufSize * sizeof(char*));
-				//add error handling for reallocation of holder
 
 			}
 
@@ -116,13 +125,15 @@ char** parseInput(char* input){
 		return NULL; //so shell can handle no arguments without seg faulting
 
 	// loop through until all tokens are handed off to parsedInput
-	while(token!= NULL){
+	while(token!= NULL)
+	{
 
 		parsedInput[location] = token;
 		location++;
 
 		// if the buffer is too small, reallocate space in 50byte increments
-		if(location >= bufSize){
+		if(location >= bufSize)
+		{
 
 			bufSize += DEFAULT_BUF_SIZE;
 			parsedInput = (char**)realloc(parsedInput, bufSize * sizeof(char*));
