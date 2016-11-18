@@ -13,7 +13,8 @@ int main(int argc, char**argv){
 
 		char** entryNames;
 		int i = 0,
-		    numSector = CPATH.sectorNum; //for relative path handling
+		    numSector = CPATH.sectorNum;
+
 		FileData* entry, *entryBefore;
 
 		//translate to physical sec num
