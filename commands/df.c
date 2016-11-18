@@ -6,8 +6,9 @@
 int main(int argc, char *argv)
 {
     char *fatEntry;
-    int clusterCount, i, currentEntry;
-    double percentage;
+    double clusterCount =0, currentEntry =0;
+    double percentage =0;
+    int i;
     
     if(argc != 1)
     {
@@ -27,10 +28,10 @@ int main(int argc, char *argv)
         }
     }
     
-    percentage = TOTAL_CLUSTERS / clusterCount;
+    percentage = (TOTAL_CLUSTERS - clusterCount) / TOTAL_CLUSTERS;
     
-    printf("512K-Blocks     Used    Avalable    Use \n");
-    printf("%i      %i     %i     %f \n",TOTAL_CLUSTERS, (TOTAL_CLUSTERS - clusterCount), clusterCount, percentage);
+    printf("512K-Blocks     Used    Avalable    Use % \n");
+    printf("%i      %.0f     %.0f     %.2f \n",TOTAL_CLUSTERS, (TOTAL_CLUSTERS - clusterCount), clusterCount, percentage);
     
     return 0;
 }
