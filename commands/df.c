@@ -30,7 +30,7 @@ int main(int argc, char *argv)
     
     percentage = (TOTAL_CLUSTERS - clusterCount) / TOTAL_CLUSTERS;
     
-    printf("512K-Blocks     Used    Avalable    Use % \n");
+    printf("512K-Blocks     Used    Available    Use %% \n");
     printf("%i      %.0f     %.0f     %.2f \n",TOTAL_CLUSTERS, (TOTAL_CLUSTERS - clusterCount), clusterCount, percentage);
     
     return 0;

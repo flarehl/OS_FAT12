@@ -30,6 +30,7 @@ int main(int argc, char** argv) {
 		strncpy(CPATH.path, slash, 1);		
 		CPATH.sectorNum = 0;
 		memcpy(shPtr, &CPATH, SHMEMSIZE); 
+		printf("%s\n", CPATH.path);
 		return 0;
 
 	}
@@ -80,13 +81,14 @@ int main(int argc, char** argv) {
 
 					i++;
 					memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c, can be put outside loop??
+					printf("%s\n", CPATH.path);
 
 				}
 
 			} 
 			else if(strcmp(argv[1], ".") == 0 )
 			{
-				//do nothing, print the CPATH.path
+				printf("%s\n", CPATH.path);
 			}
 			else
 				printf(". and .. unavailable\n");
@@ -106,6 +108,7 @@ int main(int argc, char** argv) {
 					CPATH.sectorNum = entry->flc;
 
 					memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c
+					printf("%s\n", CPATH.path);
 				}
 				else
 					printf("argument provided was a file, not a directory\n");
