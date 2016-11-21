@@ -40,7 +40,7 @@ void printBootSector() {
 	printf("Total sector count: %13d\n", BOOT_SECTOR_ATTRIBUTES.totalSectorCount);
 	printf("Sectors per FAT: %13d\n", BOOT_SECTOR_ATTRIBUTES.sectorPerFAT);
 	printf("Sectors per track: %12d\n", BOOT_SECTOR_ATTRIBUTES.sectorPerTrack);
-	printf("Number of heads: %15d\n", BOOT_SECTOR_ATTRIBUTES.numHeads);
+	printf("Number of heads: %13d\n", BOOT_SECTOR_ATTRIBUTES.numHeads);
 
 	printf("Boot Signature (in hex):     %#03x\n", BOOT_SECTOR_ATTRIBUTES.bootSig);
 	printf("Volume ID:                   %#03x\n", BOOT_SECTOR_ATTRIBUTES.volumeID);
