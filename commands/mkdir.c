@@ -47,6 +47,7 @@ int main(int argc, char**argv){
 					// otherwise see below
 				}
 
+				printf("This command is not fully implemented, sorry\n");
 				//otherwise find unreserved entry in FAT table
 					//read FAT first or handle in findUnreserved??
 

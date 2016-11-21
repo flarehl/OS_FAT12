@@ -27,6 +27,8 @@ Available Commands:
 
 	touch x: creates a file in specified path x
 
-To compile simply run the ./setup.bash file, this will also make fresh copies of the floppies and start the shell. To start the shell without recompiling and refreshing the floppies run ./fat12 .
+COMPILATION:
+Simply run the ./setup.bash file, this will also make fresh copies of the floppies and start the shell. 
+To start the shell without recompiling and refreshing the floppies run ./fat12 .
 
-Note: shmget and other memeory operations have a permission problems on hawk. If you can please run this on an a machine that you have root permisions with.
+NOTE: shmget and other shared memory operations have a permission problems on hawk. If you can please run this on an a machine(we used an ubuntu VM) that you have root permisions with.
