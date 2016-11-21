@@ -61,12 +61,20 @@ int main(int argc, char** argv) {
 					parsed[j] = fileTranslate(parsed[j]);
 			}
 
+			// if absolute path, set sector equal to 19, otherwise start where we are
+			if(getArgc(parsed) > 1 && strncmp(parsed[0], ".", 1) != 0 && strncmp(parsed[0], "..", 2) != 0)
+			{
+				numSector = 19;
+			}
+			else if(getArgc(parsed) == 1 && (strncmp(parsed[0], ".", 1) == 0 || strncmp(parsed[0], "..", 2) == 0))
+				numSector = CPATH.sectorNum + 31;
+
 			int i = 0;
 			while(  i < getArgc(parsed) && ( (entry = searchEntries(parsed[i], numSector)) != NULL ))
 			{
 				if(isFile(entry)){
 					printf("entry is not a directory\n");
-					break;
+					return -1;
 				}
 
 				CPATH.sectorNum = entry->flc; //set to previous sector
@@ -86,8 +94,10 @@ int main(int argc, char** argv) {
 			}
 
 
-			if(entry == NULL)
+			if(entry == NULL){
 				printf("directory does not exist\n");
+				return -1;
+			}
 
 		}	
 		else if(getArgc(parsed) == 1) //handle pruning

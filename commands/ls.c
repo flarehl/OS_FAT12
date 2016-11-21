@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 	FileData* entry;
 
 
-	//translate to physical sec num
+	//translate to physical sec num, redundant change in refactor
 	if(CPATH.sectorNum == 0)
 		numSector = 19;
 	else
@@ -49,6 +49,23 @@ int main(int argc, char** argv) {
 
 
 		entryNames = parsePath(argv[1]);
+
+		int j = 0;
+		for(j = 0; j < getArgc(entryNames); j++)
+		{
+			if(strncmp(entryNames[j], ".", 1) != 0 && strncmp(entryNames[j], "..", 2) != 0)
+				entryNames[j] = fileTranslate(entryNames[j]);
+		}
+
+		// if absolute path, set sector equal to 19, otherwise start where we are
+		if(getArgc(entryNames) > 1 && strncmp(entryNames[0], ".", 1) != 0 && strncmp(entryNames[0], "..", 2) != 0)
+		{
+			numSector = 19;
+		}
+		else if(getArgc(entryNames) == 1 && (strncmp(entryNames[0], ".", 1) == 0 || strncmp(entryNames[0], "..", 2) == 0))
+			numSector = CPATH.sectorNum + 31;
+
+
 
 		while( i < getArgc(entryNames) )
 		{
