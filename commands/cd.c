@@ -40,75 +40,97 @@ int main(int argc, char** argv) {
 		FileData *entry;
 		CurrentPath tmp;
 		char* tmpPath = (char*)malloc(SHMEMSIZE * sizeof(char)); 
-		char* last;
 		char** parsed;
 
-		if( (strcmp(argv[1], ".") == 0 || strcmp(argv[1], "..") == 0) && strcmp(CPATH.path, "ROOT") == 0) 
-			printf("user is already in root\n");
 
-		else if(strcmp(argv[1], ".") == 0 || strcmp(argv[1], "..") == 0)
+		parsed = parsePath(argv[1]);
+
+		if( (strcmp(argv[1], ".") == 0 || strcmp(argv[1], "..") == 0) && strcmp(CPATH.path, "/") == 0) 
+			printf("user is already in root\n"); //refactor for more efficient handling
+
+		else if(getArgc(parsed) > 1) //deal with path arguments
 		{
+			//reset CPATH
+			memset(CPATH.path, '\0', MAX_PATH);
+			strcat(CPATH.path, slash); //first slash for building CPATH.path
 
-			if((entry = searchEntries(argv[1], numSector)) != NULL && strcmp(argv[1], "..") == 0)
+			int j = 0;
+			for(j = 0; j < getArgc(parsed); j++)
 			{
+				if(strncmp(parsed[j], ".", 1) != 0 && strncmp(parsed[j], "..", 2) != 0)
+					parsed[j] = fileTranslate(parsed[j]);
+			}
 
-				strcpy(tmpPath, CPATH.path); //copy path for memory
-				parsed = parsePath(tmpPath);
-
-				memset(CPATH.path, '\0', MAX_PATH);
-
-				int i = 0;
-				// gets the last filename that needs to be pruned
-				while(parsed[i] != NULL)
-				{
-					last = parsed[i];
-					i++;
+			int i = 0;
+			while(  i < getArgc(parsed) && ( (entry = searchEntries(parsed[i], numSector)) != NULL ))
+			{
+				if(isFile(entry)){
+					printf("entry is not a directory\n");
+					break;
 				}
 
 				CPATH.sectorNum = entry->flc; //set to previous sector
-				strcat(CPATH.path, slash); 
+				if(entry->flc == 0)
+					numSector = 19;
+				else 
+					numSector = entry->flc + 31;
 
-				i = 0;
-				// recreate CPATH
-				while(parsed != NULL)
-				{
+				if(strncmp(parsed[i], ".", 1) != 0 && strncmp(parsed[i], "..", 2) != 0){
+					strcat(CPATH.path, parsed[i]);
+					strcat(CPATH.path, slash);
+				} //fix bug where if using more than one . or .., the path is set incorrectly
 
-					if(strcmp(last, parsed[i]) != 0)
-					{
-						strcat(CPATH.path, parsed[i]);
-						strcat(CPATH.path, slash);
-					}
+				memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c, can be put outside loop??
+				i++;
 
-					i++;
-					memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c, can be put outside loop??
-					printf("%s\n", CPATH.path);
-
-				}
-
-			} 
-			else if(strcmp(argv[1], ".") == 0 )
-			{
-				printf("%s\n", CPATH.path);
 			}
-			else
-				printf(". and .. unavailable\n");
+
+
+			if(entry == NULL)
+				printf("directory does not exist\n");
 
 		}	
-		else 
+		else if(getArgc(parsed) == 1) //handle pruning
 		{
+			char *name = argv[1];
 
-			if((entry = searchEntries(argv[1], numSector)) != NULL)
+			if(strncmp(name, ".", 1) != 0 && strncmp(name, "..", 2) != 0){
+				name = fileTranslate(argv[1]);
+			}	
+
+			if((entry = searchEntries(name, numSector)) != NULL)
 			{
 
 				if( !isFile(entry) )
 				{
+					if(strncmp(name, ".", 1) != 0 && strncmp(name, "..", 2) != 0)
+					{
+						strcat(CPATH.path, name);
+						strcat(CPATH.path, slash);
+					}
+					else if(strncmp(name, "..", 2) == 0)
+					{
+						char tmp[1024]; //find out why later
+						char** parsedTmp;
 
-					strcat(CPATH.path, argv[1]);
-					strcat(CPATH.path, slash);
+						strcpy(tmp, CPATH.path);
+						parsedTmp = parsePath(tmp);
+
+						//rebuild CPATH
+						memset(CPATH.path, '\0', MAX_PATH);
+						strcat(CPATH.path, slash); 
+
+						int i = 0;
+						while(i < getArgc(parsedTmp) - 1){
+							strcat(CPATH.path, parsedTmp[i]);
+							strcat(CPATH.path, slash); 
+							i++;
+						}
+					}
+
 					CPATH.sectorNum = entry->flc;
+					memcpy(shPtr, &CPATH, SHMEMSIZE);
 
-					memcpy(shPtr, &CPATH, SHMEMSIZE); //updates shmem for fat12.c
-					printf("%s\n", CPATH.path);
 				}
 				else
 					printf("argument provided was a file, not a directory\n");
@@ -119,10 +141,14 @@ int main(int argc, char** argv) {
 
 		}
 
+
+
 	} else 
 		printf("cd may only handle 1 or 2 arguments\n");
 	
 
+	memcpy(&CPATH, shPtr, SHMEMSIZE); //read in from shared memory
+	printf("%s\n", CPATH.path);
 
 	detachShmem(shPtr);
 
