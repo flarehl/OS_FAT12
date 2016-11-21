@@ -127,8 +127,8 @@ int readBootSector() {
 	BOOT_SECTOR_ATTRIBUTES.sectorPerTrack = mostSignificantBits | leastSignificantBits;
 
 	// sets number of heads
-	mostSignificantBits = (((int)buffer[12]) << 8) & 0x0000ff00;
-	leastSignificantBits = ((int)buffer[11]) & 0x000000ff;
+	mostSignificantBits = (((int)buffer[27]) << 8) & 0x0000ff00;
+	leastSignificantBits = ((int)buffer[26]) & 0x000000ff;
 	BOOT_SECTOR_ATTRIBUTES.numHeads = mostSignificantBits | leastSignificantBits;
 
 	// sets boot signature
