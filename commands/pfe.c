@@ -15,7 +15,6 @@ int main(int argc, char** argv) {
 	if(argc != 3)
 		printf("Error: pfe only accepts 2 arguments\n");
 
-	// argument validation - in fatSupport
 	if ( checkRange( atoi(argv[1]), atoi(argv[2]) ) ) 
 	{
 

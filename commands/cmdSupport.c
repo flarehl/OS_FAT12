@@ -217,6 +217,48 @@ void displayLs(FileData* entry)
 
 
 /******************************************************************************
+* extendDirectory
+*
+* allocates more space for a directory
+*
+* fatNum: the FAT entry number to read first which is the flc of the firectory 
+*
+* Return: if the directory has been extended, return true, if the disk is 
+*       full, false
+*****************************************************************************/
+bool extendDirectory(int fatNum)
+{
+    unsigned char* fat;
+    int value, i;
+
+    fat = readFAT12Table(1);
+
+    while( (value = get_fat_entry(fatNum, fat)) != (char)0xfff && (value = get_fat_entry(fatNum, fat)) != (char)0xff7)
+    {
+        //if dir is already multi-sector, traverse until last entry is reached
+        fatNum = value;
+    }
+
+    if((value = get_fat_entry(fatNum, fat)) != (char)0xff7)
+    {
+        printf("There was a bad cluster\n");
+        return FALSE;
+    }
+
+    //search for free entry with get_fat_entry(fatNum)
+    //while fat buffer is available
+
+    for(i = 0; i < 2847 * BYTES_PER_SECTOR; i++)
+    {
+
+    }
+
+
+
+    return TRUE;
+}
+
+/******************************************************************************
 * fileTranslate
 *
 * translates given filename to all caps and replaces any dots with spaces
@@ -229,35 +271,56 @@ void displayLs(FileData* entry)
 char* fileTranslate(char* fileName)
 {
     int i;
-    
-   for(i = 0; i < strlen(fileName); i++)
-   {
 
-      fileName[i] = toupper(fileName[i]);
-      if(fileName[i] == '.')
-         fileName[i] = ' '; //replace dots with spaces
+    for(i = 0; i < strlen(fileName); i++)
+    {
 
-   }
+        fileName[i] = toupper(fileName[i]);
+        if(fileName[i] == '.')
+            fileName[i] = ' '; //replace dots with spaces
 
-   return fileName;
+    }
+
+    return fileName;
 
 }
 
 /******************************************************************************
 * findUnreserved
 *
-* finds the first unreserved entry 
+* finds the first unreserved entry and returns that offset
 *
-* numSector: the sector number that should be read to find the 
-*        unreserved space
+* directory: the buffer that holds the directory entries
 *  
 * Return: the sector value for the first unreserved entry
 *****************************************************************************/
-int findUnreserved(int numSector)
+int findFree(unsigned char* directory)
 {
+    int i = 0,
+        offset = 0;
+    FileData* entry;
 
+    for(i = 0; i < 16; i++) // for the # of possible entries in a directory
+    {
+        if((entry = readEntry(directory, &offset)) == NULL)
+        {
+            printf("Should not be NULL\n");
+            return -1;
+        } 
+        else
+        {
+            if( isEmpty(entry) || isDeleted(entry))
+            {
+                printf("FOUND\n");
+                return offset;
+            }
+            else
+                continue;
+            
+        }
+    }
 
-    return 0;
+    return -1;
 }
 
 
@@ -678,7 +741,7 @@ FileData* readEntry(char* buffer, int *offset)
 *
 * Reads the FAT12 tables 
 *
-* numSector:  The number of the FAT entry
+* FAT_Number:  The number of the FAT entry
 *
 * return: returns buffer holding fat entries
 *****************************************************************************/

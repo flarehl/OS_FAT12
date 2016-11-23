@@ -13,7 +13,8 @@ int main(int argc, char**argv){
 
 		char** entryNames;
 		int i = 0,
-		    numSector = CPATH.sectorNum;
+		    numSector = CPATH.sectorNum,
+		    offset = 0;
 
 		FileData* entry, *entryBefore;
 
@@ -44,13 +45,25 @@ int main(int argc, char**argv){
 				if( isFull(entryBefore) )
 				{
 					// reallocate space for another sector if unreserved is available
-					// otherwise see below
+					if(!extendDirectory(entryBefore->flc))
+					{
+						printf("directory could not be extended\n");
+						return -1;
+					}
+					
 				}
 
-				printf("This command is not fully implemented, sorry\n");
-				//otherwise find unreserved entry in FAT table
-					//read FAT first or handle in findUnreserved??
+				printf("This command is not fully implemented, work in progress...\n");
 
+				unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
+				if(read_sector(numSector, buffer) == -1)
+				{
+					printf("Error reading sector %i\n", numSector);
+					return -1;
+				}
+
+				offset = findFree(buffer);
+				// subtract 32 to get the start of the entry
 
 				return 0;
 

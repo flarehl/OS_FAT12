@@ -1,4 +1,4 @@
-all: command fat12.o shell.o shmem.o
+all: command fat12.o shell.o shmem.o 
 	gcc -o fat12 fat12.o shell.o shmem.o
 
 command: 
@@ -12,3 +12,4 @@ shell.o: shell.c shell.h
 
 shmem.o: ./utilities/shmem.c ./utilities/shmem.h
 	gcc -c ./utilities/shmem.c
+

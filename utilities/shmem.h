@@ -10,7 +10,7 @@
 #include "../structures/cwd.h"
 
 #define SHMEMSIZE sizeof(CurrentPath)
-#define SHMEMKEY 9685
+#define SHMEMKEY 5689
 
 CurrentPath CPATH;
 

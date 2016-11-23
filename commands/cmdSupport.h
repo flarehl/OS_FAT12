@@ -28,8 +28,9 @@ int write_sector(int sector_number, unsigned char* buffer);
 /* Functions added by HLeo & SBrikiatis */
 
 void           displayLs(FileData*);
+bool           extendDirectory(int); //work in progress
 char*          fileTranslate(char*);
-int            findUnreserved(int); //Work in Progress 
+int            findFree(unsigned char*); 
 int            getArgc(char**);
 int            getPhysSector(int);
 int            getSectorOffset(char *itemName, unsigned char *directory);
