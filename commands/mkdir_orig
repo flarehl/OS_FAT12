@@ -1,0 +1,210 @@
+#include "cmdSupport.h"
+
+int main(int argc, char **argv){
+	
+	/* Setup Shared Memory */
+	void *shPtr;
+	accessShmem(&shPtr); //passing address of the pointer, int value
+	memset(CPATH.path, '\0', MAX_PATH);
+	memcpy(&CPATH, shPtr, SHMEMSIZE); //read in from shared memory
+
+	if(argc == 2)
+	{
+
+		char** entryNames;
+		int i = 0,
+		    numSector = CPATH.sectorNum,
+		    offset = 0;
+
+		FileData* entry, *entryBefore;
+
+		//translate to physical sec num
+		if(CPATH.sectorNum == 0)
+			numSector = 19;
+		else
+			numSector += 31;
+
+
+		entryNames = parsePath(argv[1]);
+
+
+		if( getArgc(entryNames) == 1 )
+		{
+			// search current CPATH and create mkdir there, meaning
+			// there should be a function that deals with the actual creation
+
+			if((entry = searchEntries(*entryNames, numSector)) == NULL )
+			{
+				
+				/*if( isFull(entryBefore) )
+				{
+
+					if(!extendDirectory(entryBefore->flc))
+					{
+						printf("directory could not be extended\n");
+						return -1;
+					}
+					
+				}*/
+
+				unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
+				if(read_sector(numSector, buffer) == -1)
+				{
+					printf("Error reading sector %i\n", numSector);
+					return -1;
+				}
+
+				offset = findFree(buffer);
+
+				// uppercase everything ignore extensions for now
+				for(i = 0; i < strlen(entryNames[0]); i++)
+				{
+					entryNames[0][i] = toupper(entryNames[0][i]);
+				}
+
+				// set filename
+				int iOff = offset - 31;
+				int j = 0;
+				for(i = offset-31; i < iOff + 8; i++)
+				{
+					if(j >= strlen(*entryNames))
+					{
+						buffer[i] = (char)0x20;
+					}
+					else
+					{
+						buffer[i] = entryNames[0][j];
+						j++;
+					}
+				}
+
+				iOff += 8;
+
+				// set extension only deals with non ext name for testing
+				for(; i < iOff + 3; i++)
+				{
+					buffer[i] = (char)0x20;
+				}
+				
+				// set attribute to subdir
+				buffer[i] |= (1 << 4);
+
+				// skip unnecessary values
+				i += 14;
+				iOff += 14;
+
+				// set flc to current sector number
+				buffer[i] = (CPATH.sectorNum << 24) & 0xFF;
+				i++;
+				buffer[i] = (CPATH.sectorNum << 16) & 0xFF;
+				i++;
+				buffer[i] = (CPATH.sectorNum << 8) & 0xFF;
+				i++;
+				buffer[i] = CPATH.sectorNum & 0xFF;
+				i++;
+
+
+				// set filesize to 0 always 0
+				for(; i < iOff + 4; i++)
+				{
+					buffer[i] |= (0 << 7);
+					buffer[i] |= (0 << 6);
+					buffer[i] |= (0 << 5);
+					buffer[i] |= (0 << 4);
+					buffer[i] |= (0 << 3);
+					buffer[i] |= (0 << 2);
+					buffer[i] |= (0 << 1);
+					buffer[i] |= (0 << 0);
+				}
+				
+				offset = offset - 31;
+				FileData *entry = readEntry(buffer, &offset);
+				printf("filesize: %i.\n", entry->fileSize);
+				printf("flc: %i.\n", entry->flc);
+				printf("isfile: %i.\n", isFile(entry));
+				printf("fileext: %s.\n", entry->fileExt);
+
+				write_sector(numSector, buffer);
+
+				printf("Successfully created directory\n");
+				return 0;
+
+			}
+			else
+			{
+				printf("entry already exists\n");
+				return -1;
+			}
+
+			return 0;
+		}
+
+		// uppercase everything ignore extensions for now
+		int j = 0;
+		for(i = 0; i < strlen(entryNames[i]); i++)
+		{
+			entryNames[i][j] = toupper(entryNames[i][j]);
+			j++;
+		}
+
+		while( i < getArgc(entryNames) )
+		{
+
+			if((entry = searchEntries(entryNames[i], numSector)) == NULL && i == (getArgc(entryNames) - 1) )
+			{
+				
+				if( isFull(entryBefore) )
+				{
+					// reallocate space for another sector if unreserved is available
+					if(!extendDirectory(entryBefore->flc))
+					{
+						printf("directory could not be extended\n");
+						return -1;
+					}
+					
+				}
+
+				unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
+				if(read_sector(numSector, buffer) == -1)
+				{
+					printf("Error reading sector %i\n", numSector);
+					return -1;
+				}
+
+				offset = findFree(buffer);
+				// set file name, extension, subdir attribute, flc and size(0)
+
+
+
+				return 0;
+
+			}
+			else if((entry = searchEntries(entryNames[i], numSector)) != NULL && i != (getArgc(entryNames) - 1))
+			{
+				entryBefore = entry;
+
+				if(entry->flc == 0)
+					numSector = 19;
+				else
+					numSector = entry->flc + 31;
+					
+				i++;
+			}
+			else
+			{
+				printf("entry already exists\n");
+				return -1;
+			}
+
+		}
+
+	}
+	else 
+	{ 
+
+		printf("wrong number of arguments for mkdir\n");
+		return -1;
+	}
+
+	return 0;
+}

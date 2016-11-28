@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#cp backupFlopies/floppy1 floppies/floppy1
-#cp backupFlopies/floppy2 floppies/floppy2
-#cp backupFlopies/floppy3 floppies/floppy3
+#cp backupFloppies/floppy1 floppies/floppy1
+#cp backupFloppies/floppy2 floppies/floppy2
+#cp backupFloppies/floppy3 floppies/floppy3
 
-cp backupFlopies/floppy1 floppies/floppy1
-cp backupFlopies/floppy2 floppies/floppy2
-cp backupFlopies/floppy3 floppies/floppy3
+cp backupFloppies/floppy1 floppies/floppy1
+cp backupFloppies/floppy2 floppies/floppy2
+cp backupFloppies/floppy3 floppies/floppy3
 make
 ./fat12

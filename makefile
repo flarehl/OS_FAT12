@@ -5,7 +5,7 @@ command:
 	cd commands && $(MAKE)
 
 fat12.o: fat12.c shell.h
-	gcc -c fat12 fat12.c shell.c 
+	gcc -c fat12.c shell.c 
 
 shell.o: shell.c shell.h
 	gcc -c shell.c
