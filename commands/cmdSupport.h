@@ -30,6 +30,7 @@ int write_sector(int sector_number, unsigned char* buffer);
 void           displayLs(FileData*);
 bool           extendDirectory(int); // WORK IN PROGRESS
 char*          fileTranslate(char*);
+//int            findCluster(char*, int);
 int            findFree(unsigned char*); 
 int            findFreeCluster();
 int            findFreeFAT(); // WORK IN PROGRESS

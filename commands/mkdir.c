@@ -23,12 +23,18 @@ int main(int argc, char **argv){
 		if(getArgc(entryNames) == 1)
 		{
 			strcpy(string, CPATH.path);
-			strcat(string, argv[1]);
+			strcat(string, argv[1]);	
+
 			char **parsed = parsePath(string);
-			if(parsed == NULL)
+
+			if(parsed == NULL){
 				addDir(entryNames);
-			else
+			}
+			else{
 				addDir(parsed);
+			}
+			
+
 		}
 		else
 		{
@@ -60,14 +66,8 @@ int main(int argc, char **argv){
 *****************************************************************************/
 bool addDir(char **entryNames)
 {
-	int numSector = CPATH.sectorNum;
+	int numSector = 19; //everything starts at root
 	FileData* entry, *entryBefore;
-
-	//translate to physical sec num
-	if(CPATH.sectorNum == 0)
-		numSector = 19;
-	else
-		numSector += 31;
 
 	// uppercase everything ignore extensions for now
 	int j;
@@ -79,7 +79,6 @@ bool addDir(char **entryNames)
 			entryNames[i][j] = toupper(entryNames[i][j]);
 
 	}
-
 
 	i = 0;
 	while( i < getArgc(entryNames) )
@@ -103,13 +102,16 @@ bool addDir(char **entryNames)
 
 			unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
 			int nCluster = createDir(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
+
+			nCluster += 31;
+
 			createDir(nCluster, ".", buffer, -1); // -1 is filler
 			createDir(nCluster, "..", buffer, entryBefore->flc);	
 
 			return 0;
 
 		}
-		else if((entry = searchEntries(entryNames[i], numSector)) != NULL && i != (getArgc(entryNames) - 1))
+		else if((entry = searchEntries(entryNames[i], numSector)) != NULL && i < (getArgc(entryNames) - 1))
 		{
 			entryBefore = entry;
 
@@ -174,30 +176,32 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	}
 	
 	// set attribute to subdir
-	buffer[i] |= (1 << 4);
+	buffer[i] = (char)0x10;
 
 	// skip unnecessary values
 	i += 14;
 	iOff += 14;
 
-	// set flc to FREE FAT ENTRY NUMBER
 	if(strcmp(fname, ".") == 0)
 	{
+		numSector -= 31;
 		buffer[i++] = (numSector << 8) & 0xFF;
 		buffer[i++] = numSector & 0xFF;
 		numSector += 31;
+		writeToFAT(numSector);
 	}
 	else if(strcmp(fname, "..") == 0)
 	{
 		buffer[i++] = (prevSec << 8) & 0xFF;
 		buffer[i++] = prevSec & 0xFF;
-		numSector += 31;
+		writeToFAT(prevSec);
 	}
 	else
 	{
 		freeCluster = findFreeCluster();
 		buffer[i++] = (freeCluster << 8) & 0xFF;
 		buffer[i++] = freeCluster & 0xFF;
+		writeToFAT(freeCluster);
 	}
 
 	// set filesize to 0 always 0 
@@ -207,18 +211,21 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	buffer[i++] = 0;
 
 
-	    /**** for testing purposes ****/
-	entry = readEntry(buffer, &offset);
+		/**************** FOR TESTING PURPOSES ****************/
 
-	printf("filename: %s.\n", entry->fileName);
-	printf("filesize: %i.\n", entry->fileSize);
-	printf("flc:      %i.\n", entry->flc);
-	printf("isfile:   %i.\n", isFile(entry));
-	printf("fileext:  %s.\n", entry->fileExt);
-	    /* end testing snippet */
+				entry = readEntry(buffer, &offset);
 
-	printf("numSector: %i\n", numSector);
-	writeToFAT(freeCluster);
+				printf("filename: %s.\n", entry->fileName);
+				printf("filesize: %i.\n", entry->fileSize);
+				printf("flc:      %i.\n", entry->flc);
+				printf("isfile:   %i.\n", isFile(entry));
+				printf("fileext:  %s.\n", entry->fileExt);
+
+				printf("numSector: %i\n", numSector);
+
+		/**************** END TESTING SNIPPET *****************/
+
+
 	write_sector(numSector, buffer);
 
 	printf("Successfully created directory\n");
@@ -235,5 +242,10 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 *****************************************************************************/
 bool validateInput(char** argv)
 {
+	//check if filename + ext is 8 chars long
+	//see specs for conversion format
+	//convert dots to spaces
+	//after dot can only be 3 chars
+
 	return 0;
 }

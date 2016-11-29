@@ -36,9 +36,16 @@ int read_sector(int sector_number, unsigned char* buffer)
 {
    int bytes_read;
 
+    FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
+    if (FILE_SYSTEM_ID == NULL) 
+    {
+      printf("Could not open the floppy drive or image.\n");
+      exit(1);
+    }
+
    if (fseek(FILE_SYSTEM_ID, (long) sector_number * (long) BYTES_PER_SECTOR, SEEK_SET) != 0)
    {
-	   printf("Error accessing sector %d\n", sector_number);
+	   printf("r_s: Error accessing sector %d\n", sector_number);
       return -1;
    }
 
@@ -46,7 +53,7 @@ int read_sector(int sector_number, unsigned char* buffer)
 
    if (bytes_read != BYTES_PER_SECTOR)
    {
-      printf("Error reading sector %d\n", sector_number);
+      printf("r_s: Error reading sector %d\n", sector_number);
       return -1;
    }
 
@@ -67,24 +74,32 @@ int read_sector(int sector_number, unsigned char* buffer)
  ****************************************************************************/
 int write_sector(int sector_number, unsigned char* buffer) 
 {
-   int bytes_written;
+    int bytes_written;
 
-   if (fseek(FILE_SYSTEM_ID,
+    FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
+    if (FILE_SYSTEM_ID == NULL) 
+    {
+      printf("Could not open the floppy drive or image.\n");
+      exit(1);
+    }
+
+    if (fseek(FILE_SYSTEM_ID,
        (long) sector_number * (long) BYTES_PER_SECTOR, SEEK_SET) != 0) 
-   {
-      printf("Error accessing sector %d\n", sector_number);
+    {
+      printf("w_s: Error accessing sector %d\n", sector_number);
       return -1;
-   }
+    }
 
-   bytes_written = fwrite(buffer, sizeof(char), BYTES_PER_SECTOR, FILE_SYSTEM_ID);
+    bytes_written = fwrite(buffer, sizeof(char), BYTES_PER_SECTOR, FILE_SYSTEM_ID);
 
-   if (bytes_written != BYTES_PER_SECTOR) 
-   {
-      printf("Error reading sector %d\n", sector_number);
+    if (bytes_written != BYTES_PER_SECTOR) 
+    {
+      printf("w_s: Error reading sector %d\n", sector_number);
       return -1;
-   }
+    }
 
-   return bytes_written;
+    fclose(FILE_SYSTEM_ID);
+    return bytes_written;
 }
 
 
@@ -285,6 +300,8 @@ char* fileTranslate(char* fileName)
 
 }
 
+
+
 /******************************************************************************
 * findUnreserved
 *
@@ -311,7 +328,6 @@ int findFree(unsigned char* directory)
         {
             if( isEmpty(entry) || isDeleted(entry))
             {
-                printf("FOUND\n");
                 return offset;
             }
             else
@@ -338,8 +354,9 @@ int findFreeCluster()
 
     for(i = 2; i < 9 * BYTES_PER_SECTOR; i++)
     {
-        if((freeCluster = get_fat_entry(i, fat)) == (char)0x00)
+        if((freeCluster = get_fat_entry(i, fat)) == (char)0x00){
             return i;
+        }
     }
 
     return -1;
@@ -875,6 +892,7 @@ FileData* searchEntries(char* fileName, int numSector)
 
             if( strcmp(name, fileName) == 0 )
             {
+                fclose(FILE_SYSTEM_ID);
                 return entry; 
             }
 
@@ -916,13 +934,8 @@ bool writeToFAT(int freeCluster)
         default: break;
     }
 
-    if(freeCluster == 0)
-        freeCluster = 19;
-    else
-        freeCluster += 31;
-    
     set_fat_entry(freeCluster, (int)0xfff, fat);
-    write_sector(fatSector, fat);
+    write_sector(fatSector, fat);   
 
     return TRUE;
 }
