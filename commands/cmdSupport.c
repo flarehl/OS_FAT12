@@ -232,11 +232,11 @@ void displayLs(FileData* entry)
 
 
 /******************************************************************************
-* extendDirectory
+* extendDirectory -- BROKEN
 *
 * allocates more space for a directory
 *
-* fatNum: the FAT entry number to read first which is the flc of the firectory 
+* fatNum: the FAT entry number to read first which is the flc of the directory 
 *
 * Return: if the directory has been extended, return true, if the disk is 
 *       full, false
@@ -244,7 +244,7 @@ void displayLs(FileData* entry)
 bool extendDirectory(int fatNum)
 {
     unsigned char* fat;
-    int value, i;
+    int value, i, orig = fatNum;
 
     fat = readFAT12Table(1);
 
@@ -254,24 +254,23 @@ bool extendDirectory(int fatNum)
         fatNum = value;
     }
 
-    if((value = get_fat_entry(fatNum, fat)) != (char)0xff7)
+    if((value = get_fat_entry(fatNum, fat)) == (char)0xff7)
     {
         printf("There was a bad cluster\n");
         return FALSE;
     }
 
-    //search for free entry with get_fat_entry(fatNum)
-    //while fat buffer is available
+    int freeCluster = findFreeCluster();
 
-    for(i = 0; i < 2847 * BYTES_PER_SECTOR; i++)
-    {
+    set_fat_entry(orig, freeCluster, fat);
+    writeToFAT(orig);
 
-    }
-
-
+    set_fat_entry(freeCluster, (int)0xfff, fat);
+    writeToFAT(freeCluster);
 
     return TRUE;
 }
+
 
 /******************************************************************************
 * fileTranslate
@@ -319,21 +318,18 @@ int findFree(unsigned char* directory)
 
     for(i = 0; i < 16; i++) // for the # of possible entries in a directory
     {
-        if((entry = readEntry(directory, &offset)) == NULL)
+        entry = readEntry(directory, &offset);
+        //printf("entry->fN[%i]: %x\n", i, entry->fileName[0]);
+
+        if( isEmpty(entry) || isDeleted(entry))
         {
-            printf("Should not be NULL\n");
-            return -1;
-        } 
+            return offset;
+        }
         else
         {
-            if( isEmpty(entry) || isDeleted(entry))
-            {
-                return offset;
-            }
-            else
-                continue;
-            
+            continue;
         }
+            
     }
 
     return -1;
@@ -690,6 +686,7 @@ char** parsePath(char* path)
 *****************************************************************************/
 FileData* readEntry(char* buffer, int *offset)
 {
+   printf("offset: %i\n", *offset);
 
    FileData* entry;
    entry = (FileData*)malloc(sizeof(FileData));
@@ -716,46 +713,7 @@ FileData* readEntry(char* buffer, int *offset)
    short leastSignificantBits = ((short)buffer[*offset]) & 0x00ff;
    entry->reserved = mostSignificantBits | leastSignificantBits;
 
-   *offset += 2;
-
-   for(i = 0; i < 2; i++)
-   {
-      entry->createTime[i] = buffer[*offset];
-      (*offset)++;
-   }
-   entry->createTime[i] = '\0';
-
-   for(i = 0; i < 2; i++)
-   {
-      entry->createDate[i] = buffer[*offset];
-      (*offset)++;
-   }
-   entry->createDate[i] = '\0';  
-
-   for(i = 0; i < 2; i++)
-   {
-      entry->lastAccessDate[i] = buffer[*offset];
-      (*offset)++;
-   }
-   entry->lastAccessDate[i] = '\0';
-
-   //ignore 2 bytes here
-   (*offset)+=2;
-
-   for(i = 0; i < 2; i++)
-   {
-      entry->lastWriteTime[i] = buffer[*offset];
-      (*offset)++;
-   }
-   entry->lastWriteTime[i] = '\0';
-
-
-   for(i = 0; i < 2; i++)
-   {
-      entry->lastWriteDate[i] = buffer[*offset];
-      (*offset)++;
-   }
-   entry->lastWriteDate[i] = '\0';
+   *offset += 14;
 
    mostSignificantBits = (((short)buffer[*offset+1]) << 8) & 0xff00;
    leastSignificantBits = ((short)buffer[*offset]) & 0x00ff;

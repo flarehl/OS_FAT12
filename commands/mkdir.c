@@ -87,7 +87,7 @@ bool addDir(char **entryNames)
 		if((entry = searchEntries(entryNames[i], numSector)) == NULL && i == (getArgc(entryNames) - 1) )
 		{
 			
-			/***** EXTENDDIRECTORY() NOT FUNCTIONAL YET *****
+			/******* EXTENDDIRECTORY() NOT FUNCTIONAL YET ********
 			if( isFull(entryBefore) )
 			{
 				// reallocate space for another sector if unreserved is available
@@ -97,8 +97,8 @@ bool addDir(char **entryNames)
 					return -1;
 				}
 				
-			}
-			*/
+			}*/
+			
 
 			unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
 			int nCluster = createDir(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
@@ -106,7 +106,7 @@ bool addDir(char **entryNames)
 			nCluster += 31;
 
 			createDir(nCluster, ".", buffer, -1); // -1 is filler
-			createDir(nCluster, "..", buffer, entryBefore->flc);	
+			//createDir(nCluster, "..", buffer, entryBefore->flc);	
 
 			return 0;
 
@@ -166,11 +166,10 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 			buffer[i] = (char)0x20;	
 		}
 	}
-
 	iOff += 8;
 
 	// set extension only deals with non ext name for testing
-	for(; i < iOff + 3; i++)
+	for(i = iOff; i < iOff + 3; i++)
 	{
 		buffer[i] = (char)0x20;
 	}
@@ -179,43 +178,62 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	buffer[i] = (char)0x10;
 
 	// skip unnecessary values
-	i += 14;
-	iOff += 14;
+	i += 15;
 
 	if(strcmp(fname, ".") == 0)
 	{
 		numSector -= 31;
-		buffer[i++] = (numSector << 8) & 0xFF;
-		buffer[i++] = numSector & 0xFF;
+		buffer[i+1] = (numSector << 8) & 0xFF;
+		buffer[i] = numSector & 0xFF;
+
+		i += 2;
+
 		numSector += 31;
 		writeToFAT(numSector);
 	}
 	else if(strcmp(fname, "..") == 0)
 	{
-		buffer[i++] = (prevSec << 8) & 0xFF;
-		buffer[i++] = prevSec & 0xFF;
+		buffer[i+1] = (prevSec << 8) & 0xFF;
+		buffer[i] = prevSec & 0xFF;
+
+		i += 2;
+
 		writeToFAT(prevSec);
 	}
 	else
 	{
 		freeCluster = findFreeCluster();
-		buffer[i++] = (freeCluster << 8) & 0xFF;
-		buffer[i++] = freeCluster & 0xFF;
+
+		buffer[i+1] = (freeCluster << 8) & 0xFF;
+		buffer[i] = freeCluster & 0xFF;
+
+		i+=2; //increase one more time
 		writeToFAT(freeCluster);
+
+		// set new directory buffer so offset isnt fucked, DOESNT WORK
+		unsigned char* nBuffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
+		memset(nBuffer, 0, BYTES_PER_SECTOR);
+
+		freeCluster += 31;
+		write_sector(freeCluster, nBuffer);
+		freeCluster -= 31;
+
+
 	}
 
+	i += 3;
 	// set filesize to 0 always 0 
-	buffer[i++] = 0;
-	buffer[i++] = 0;
-	buffer[i++] = 0;
-	buffer[i++] = 0;
+	buffer[i--] = 0;
+	buffer[i--] = 0;
+	buffer[i--] = 0;
+	buffer[i] = 0;
 
 
 		/**************** FOR TESTING PURPOSES ****************/
 
 				entry = readEntry(buffer, &offset);
 
-				printf("filename: %s.\n", entry->fileName);
+				printf("\nfilename: %s.\n", entry->fileName);
 				printf("filesize: %i.\n", entry->fileSize);
 				printf("flc:      %i.\n", entry->flc);
 				printf("isfile:   %i.\n", isFile(entry));
@@ -225,10 +243,9 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 
 		/**************** END TESTING SNIPPET *****************/
 
-
 	write_sector(numSector, buffer);
 
-	printf("Successfully created directory\n");
+	printf("Successfully created directory\n\n\n");
 	return freeCluster;
 }
 
