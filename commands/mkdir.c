@@ -2,6 +2,7 @@
 
 // PROTOTYPES //
 bool addDir(char**);
+int createDir(int, char*, char*, int);
 bool validateInput(char**);
 
 
@@ -48,11 +49,15 @@ int main(int argc, char **argv){
 
 
 
-
-
-
 //******************* FUNCTION DEFINITIONS *********************//
 
+/******************************************************************************
+* addDir
+*
+* finds an unreserved entry in FAT
+*  
+* Return: logical cluster number, -1 if not found
+*****************************************************************************/
 bool addDir(char **entryNames)
 {
 	int numSector = CPATH.sectorNum;
@@ -97,70 +102,9 @@ bool addDir(char **entryNames)
 			*/
 
 			unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
-			if(read_sector(numSector, buffer) == -1)
-			{
-				printf("Error reading sector %i\n", numSector);
-				return -1;
-			}
-
-			int offset = findFree(buffer);
-			int iOff = offset;
-
-			// set filename
-			int j = 0;
-			for(i = offset; i < iOff + 8; i++)
-			{
-				if(j < strlen(entryNames[getArgc(entryNames) - 1]))
-				{
-					buffer[i] = entryNames[getArgc(entryNames) - 1][j];
-					j++;
-				}
-				else
-				{
-					buffer[i] = (char)0x20;	
-				}
-			}
-
-			iOff += 8;
-
-			// set extension only deals with non ext name for testing
-			for(; i < iOff + 3; i++)
-			{
-				buffer[i] = (char)0x20;
-			}
-			
-			// set attribute to subdir
-			buffer[i] |= (1 << 4);
-
-			// skip unnecessary values
-			i += 14;
-			iOff += 14;
-
-			// set flc to FREE FAT ENTRY NUMBER
-			buffer[i++] = (numSector << 8) & 0xFF;
-			buffer[i++] = numSector & 0xFF;
-
-			// set filesize to 0 always 0 BROKEN
-			buffer[i++] = 0x00;
-			buffer[i++] = 0x00;
-			buffer[i++] = 0x00;
-			buffer[i++] = 0x00;
-					
-
-
-			    /**** for testing purposes ****/
-			entry = readEntry(buffer, &offset);
-
-			printf("filename: %s.\n", entry->fileName);
-			printf("filesize: %i.\n", entry->fileSize);
-			printf("flc:      %i.\n", entry->flc);
-			printf("isfile:   %i.\n", isFile(entry));
-			printf("fileext:  %s.\n", entry->fileExt);
-			    /* end testing snippet */
-
-			write_sector(numSector, buffer);
-
-			printf("Successfully created directory\n");
+			int nCluster = createDir(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
+			createDir(nCluster, ".", buffer, -1); // -1 is filler
+			createDir(nCluster, "..", buffer, entryBefore->flc);	
 
 			return 0;
 
@@ -185,7 +129,111 @@ bool addDir(char **entryNames)
 	}
 }
 
+
+/******************************************************************************
+* createDir
+*
+* finds an unreserved entry in FAT
+*  
+* Return: sector of directory created
+*****************************************************************************/
+int createDir(int numSector, char* fname, char* buffer, int prevSec)
+{
+	if(read_sector(numSector, buffer) == -1)
+	{
+		printf("Error reading sector %i\n", numSector);
+		return -1;
+	}
+
+	FileData *entry;
+	int offset = findFree(buffer);
+	int iOff = offset;
+	int freeCluster;
+
+	// set filename
+	int i, j = 0;
+	for(i = offset; i < iOff + 8; i++)
+	{
+		if(j < strlen(fname))
+		{
+			buffer[i] = fname[j];
+			j++;
+		}
+		else
+		{
+			buffer[i] = (char)0x20;	
+		}
+	}
+
+	iOff += 8;
+
+	// set extension only deals with non ext name for testing
+	for(; i < iOff + 3; i++)
+	{
+		buffer[i] = (char)0x20;
+	}
+	
+	// set attribute to subdir
+	buffer[i] |= (1 << 4);
+
+	// skip unnecessary values
+	i += 14;
+	iOff += 14;
+
+	// set flc to FREE FAT ENTRY NUMBER
+	if(strcmp(fname, ".") == 0)
+	{
+		buffer[i++] = (numSector << 8) & 0xFF;
+		buffer[i++] = numSector & 0xFF;
+		numSector += 31;
+	}
+	else if(strcmp(fname, "..") == 0)
+	{
+		buffer[i++] = (prevSec << 8) & 0xFF;
+		buffer[i++] = prevSec & 0xFF;
+		numSector += 31;
+	}
+	else
+	{
+		freeCluster = findFreeCluster();
+		buffer[i++] = (freeCluster << 8) & 0xFF;
+		buffer[i++] = freeCluster & 0xFF;
+	}
+
+	// set filesize to 0 always 0 
+	buffer[i++] = 0;
+	buffer[i++] = 0;
+	buffer[i++] = 0;
+	buffer[i++] = 0;
+
+
+	    /**** for testing purposes ****/
+	entry = readEntry(buffer, &offset);
+
+	printf("filename: %s.\n", entry->fileName);
+	printf("filesize: %i.\n", entry->fileSize);
+	printf("flc:      %i.\n", entry->flc);
+	printf("isfile:   %i.\n", isFile(entry));
+	printf("fileext:  %s.\n", entry->fileExt);
+	    /* end testing snippet */
+
+	printf("numSector: %i\n", numSector);
+	writeToFAT(freeCluster);
+	write_sector(numSector, buffer);
+
+	printf("Successfully created directory\n");
+	return freeCluster;
+}
+
+
+/******************************************************************************
+* validateInput
+*
+* finds an unreserved entry in FAT
+*  
+* Return: logical cluster number, -1 if not found
+*****************************************************************************/
 bool validateInput(char** argv)
 {
-
+	return 0;
 }

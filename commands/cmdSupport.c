@@ -325,6 +325,28 @@ int findFree(unsigned char* directory)
 
 
 /******************************************************************************
+* findFreeCluster
+*
+* finds an unreserved entry in FAT
+*  
+* Return: logical cluster number, -1 if not found
+*****************************************************************************/
+int findFreeCluster()
+{
+    int freeCluster, i;
+    unsigned char* fat = readFAT12Table(1);
+
+    for(i = 2; i < 9 * BYTES_PER_SECTOR; i++)
+    {
+        if((freeCluster = get_fat_entry(i, fat)) == (char)0x00)
+            return i;
+    }
+
+    return -1;
+}
+
+
+/******************************************************************************
 * getArgc
 *
 * calculates the number of strings in 
@@ -866,6 +888,42 @@ FileData* searchEntries(char* fileName, int numSector)
 
 
 
+/******************************************************************************
+* writeToFAT
+*
+* records changes to FAT
+*
+* freeCluster: the 
+*
+* Return:
+*****************************************************************************/
+bool writeToFAT(int freeCluster)
+{
+    int i;
+    unsigned char* fat = readFAT12Table(1);
 
+    int fatSector = freeCluster / BYTES_PER_SECTOR;
+    switch(fatSector){
+        case 0: fatSector = 1; break;
+        case 1: fatSector = 2; break;
+        case 2: fatSector = 3; break;
+        case 3: fatSector = 4; break;
+        case 4: fatSector = 5; break;
+        case 5: fatSector = 6; break;
+        case 6: fatSector = 7; break;
+        case 7: fatSector = 8; break;
+        case 8: fatSector = 9; break;
+        default: break;
+    }
 
+    if(freeCluster == 0)
+        freeCluster = 19;
+    else
+        freeCluster += 31;
+    
+    set_fat_entry(freeCluster, (int)0xfff, fat);
+    write_sector(fatSector, fat);
+
+    return TRUE;
+}
 

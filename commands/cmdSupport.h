@@ -31,6 +31,7 @@ void           displayLs(FileData*);
 bool           extendDirectory(int); // WORK IN PROGRESS
 char*          fileTranslate(char*);
 int            findFree(unsigned char*); 
+int            findFreeCluster();
 int            findFreeFAT(); // WORK IN PROGRESS
 int            getArgc(char**);
 int            getPhysSector(int);
@@ -45,5 +46,6 @@ char**         parsePath(char*);
 FileData*      readEntry(char*, int*);
 unsigned char* readFAT12Table(int FAT_Number);
 FileData*      searchEntries(char*, int);
+bool           writeToFAT(int);
 
 #endif
