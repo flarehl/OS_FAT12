@@ -1,13 +1,11 @@
 #include "cmdSupport.h"
 
 // PROTOTYPES //
-bool addDir(char**);
-int createDir(int, char*, char*, int);
-
-bool validateInput(char**);
+bool addFile(char**);
+int createFile(int, char*, char*, int);
 
 
-//*************** MKDIR IMPLEMENTATION W.I.P *******************//
+//*************** TOUCH IMPLEMENTATION W.I.P *******************//
 int main(int argc, char **argv){
 	
 	/* Setup Shared Memory */
@@ -29,17 +27,16 @@ int main(int argc, char **argv){
 			char **parsed = parsePath(string);
 
 			if(parsed == NULL){
-				addDir(entryNames);
+				addFile(entryNames);
 			}
 			else{
-				addDir(parsed);
+				addFile(parsed);
 			}
 			
-
 		}
 		else
 		{
-			addDir(entryNames);
+			addFile(entryNames);
 		}
 
 		return 0;
@@ -48,11 +45,11 @@ int main(int argc, char **argv){
 	else 
 	{ 
 
-		printf("wrong number of arguments for mkdir\n");
+		printf("wrong number of arguments for touch\n");
 		return -1;
 	}
 
-} /**** END MKDIR IMPLEMENTATION *****/
+} /**** END TOUCH IMPLEMENTATION *****/
 
 
 
@@ -65,7 +62,7 @@ int main(int argc, char **argv){
 *  
 * Return: logical cluster number, -1 if not found
 *****************************************************************************/
-bool addDir(char **entryNames)
+bool addFile(char **entryNames)
 {
 	int numSector = 19; //everything DOES NOT start at root
 	if(strcmp(entryNames[0], ".") == 0 || strcmp(entryNames[0], "..") == 0 ){
@@ -106,12 +103,7 @@ bool addDir(char **entryNames)
 			
 
 			unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
-			int nCluster = createDir(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
-
-			nCluster += 31;
-
-			createDir(nCluster, ".", buffer, -1); // -1 is filler
-			createDir(nCluster, "..", buffer, entryBefore->flc);	
+			createFile(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
 
 			return 0;
 
@@ -144,7 +136,7 @@ bool addDir(char **entryNames)
 *  
 * Return: sector of directory created
 *****************************************************************************/
-int createDir(int numSector, char* fname, char* buffer, int prevSec)
+int createFile(int numSector, char* fname, char* buffer, int prevSec)
 {
 	if(read_sector(numSector, buffer) == -1)
 	{
@@ -180,7 +172,7 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	}
 	
 	// set attribute to subdir
-	buffer[i] = (char)0x10;
+	buffer[i] = (char)0x00;
 
 	i += 15;
 
@@ -240,20 +232,3 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	return freeCluster;
 }
 
-
-/******************************************************************************
-* validateInput
-*
-* finds an unreserved entry in FAT
-*  
-* Return: logical cluster number, -1 if not found
-*****************************************************************************/
-bool validateInput(char** argv)
-{
-	//check if filename + ext is 8 chars long
-	//see specs for conversion format
-	//convert dots to spaces
-	//after dot can only be 3 chars
-
-	return 0;
-}

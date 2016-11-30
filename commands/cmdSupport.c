@@ -323,7 +323,7 @@ int findFree(unsigned char* directory)
 
         if( isEmpty(entry) || isDeleted(entry))
         {
-            return offset;
+            return offset - 32;
         }
             
     }
