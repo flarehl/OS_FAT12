@@ -325,10 +325,6 @@ int findFree(unsigned char* directory)
         {
             return offset;
         }
-        else
-        {
-            continue;
-        }
             
     }
 
@@ -684,9 +680,9 @@ char** parsePath(char* path)
 *
 * Return: FileData object holding entry info
 *****************************************************************************/
-FileData* readEntry(char* buffer, int *offset)
+FileData* readEntry(char* buffer, int *offset)//
 {
-   printf("offset: %i\n", *offset);
+   //printf("offset: %i\n", *offset);
 
    FileData* entry;
    entry = (FileData*)malloc(sizeof(FileData));
@@ -709,14 +705,10 @@ FileData* readEntry(char* buffer, int *offset)
    entry->fileAttributes = buffer[*offset];
    (*offset)++;
 
-   short mostSignificantBits = (((short)buffer[*offset+1]) << 8) & 0xff00;
-   short leastSignificantBits = ((short)buffer[*offset]) & 0x00ff;
-   entry->reserved = mostSignificantBits | leastSignificantBits;
-
    *offset += 14;
 
-   mostSignificantBits = (((short)buffer[*offset+1]) << 8) & 0xff00;
-   leastSignificantBits = ((short)buffer[*offset]) & 0x00ff;
+   int mostSignificantBits = (((short)buffer[*offset+1]) << 8) & 0xff00;
+   int leastSignificantBits = ((short)buffer[*offset]) & 0x00ff;
    entry->flc = mostSignificantBits | leastSignificantBits;
    *offset += 2;
 

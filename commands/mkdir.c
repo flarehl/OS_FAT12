@@ -177,9 +177,9 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	// set attribute to subdir
 	buffer[i] = (char)0x10;
 
-	// skip unnecessary values
 	i += 15;
 
+	// set flc
 	if(strcmp(fname, ".") == 0)
 	{
 		numSector -= 31;
@@ -222,7 +222,8 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	}
 
 	i += 3;
-	// set filesize to 0 always 0 
+
+	// set filesize
 	buffer[i--] = 0;
 	buffer[i--] = 0;
 	buffer[i--] = 0;
