@@ -11,6 +11,7 @@ int main(int argc, char **argv)
     int currentSectorNum;
     unsigned int fatEntryNumber;
     int offset;
+    int location; //This is the actual sector number in memory
     
     accessShmem(&shPtr); //accessing shared memory struct
     memset(CPATH.path, '\0', MAX_PATH); //CPATH is in shmem.h and MAX_PATH is in cwd.h
@@ -30,32 +31,43 @@ int main(int argc, char **argv)
         exit(-1);
     }
     
+    if(CPATH.sectorNum == 0)
+    {
+        location = 19;
+    }
+    else
+    {
+        location = CPATH.sectorNum + 32;
+    }
+    
     parsedPath = fileTranslate(argv[1]);
     
     fat = readFAT12Table(1);
     
     directory = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char*));
-    if(read_sector((int)CPATH.sectorNum, directory) == -1) //opening the user's current directory
+    if(read_sector((int)location, directory) == -1) //opening the user's current directory
     {
         printf("There was a problem opening your directory.\n");
         exit(-1);
     }
     
     
-    directorySector = searchEntries(parsedPath, CPATH.sectorNum);
+    directorySector = searchEntries(parsedPath, location);
+    
     //currently only reads the first sector of a folder, which will work, but
     //its really not complete for the program
-    
     if(directorySector->fileName[0] != 0x00)
     {
-        fatEntryNumber = get_fat_entry(directorySector->flc, fat); //clearing out the fat table
+        fatEntryNumber = get_fat_entry(directorySector->flc, fat);
+        printf("Debug directorySec: %u\n", directorySector->flc);
+        writeToFAT(directorySector->flc); //these need to have a entry type added to them
         while(fatEntryNumber != 0xFFF)
         {
-            set_fat_entry(fatEntryNumber, 0x000, fat);
-            currentSectorNum = fatEntryNumber;
-            fatEntryNumber = get_fat_entry(currentSectorNum, fat);
+            currentSectorNum = get_fat_entry(fatEntryNumber, fat);
+            //set_fat_entry(fatEntryNumber, 0x000, fat);
+            writeToFAT(fatEntryNumber);
+            fatEntryNumber = currentSectorNum;
         }
-        set_fat_entry(fatEntryNumber, 0x000, fat);
         
         offset = getSectorOffset(parsedPath, directory); //gets the actaul offset of
         //the location
@@ -65,7 +77,8 @@ int main(int argc, char **argv)
         }
         
         directory[offset] = 0xE5;
-        write_sector((long)CPATH.path, directory);
+        
+        write_sector(location, directory);
     }
     else
     {
