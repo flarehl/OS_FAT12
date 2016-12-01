@@ -435,11 +435,13 @@ int getSectorOffset(char *itemName, unsigned char *directory)
 
             }
 
-            //do we need to put a dot insert here?
+            currentItemName[currentItemNameSize] = ' ';
+            currentItemNameSize++;
+            
             for(j = 0; j < 3; j++) //this loop gets the extention
             {
                 holder = directory[currentOffset + 8 + j];
-            
+ 
                 if(holder <(char)0x30 || holder > (char)0x5B)
                 {
                     // continue;
@@ -451,7 +453,7 @@ int getSectorOffset(char *itemName, unsigned char *directory)
                 }
             }
            
-            
+            printf("Debug currentItem: %s\n ItemName: %s\n", currentItemName, itemName);
             if(strcmp(currentItemName, itemName) == 0) //comparing the two strings
             {
                 fileExists = TRUE;
@@ -752,18 +754,20 @@ unsigned char* readFAT12Table(int FAT_Number)
    if (FAT_Number == 1) {
       for (i = 0; i < 9; i++) 
          read_sector(i + 1, &fat[i * BYTES_PER_SECTOR]);
+      fclose(FILE_SYSTEM_ID);
       return fat;
    }
    else if (FAT_Number == 2) {
       for (i = 10; i < 19; i++)
          read_sector(i + 1, &fat[i * BYTES_PER_SECTOR]);
+      fclose(FILE_SYSTEM_ID);
       return fat;
    }
    else
       printf("%s\n", "Error: invalid FAT table number");
    
-
 }
+
 
 
 /******************************************************************************
@@ -785,13 +789,14 @@ FileData* searchEntries(char* fileName, int numSector)
     int offset = 0;
     int i;
 
+
     FILE_SYSTEM_ID = fopen("./floppies/floppy2", "r+");
     if (FILE_SYSTEM_ID == NULL) 
     {
       printf("Could not open the floppy drive or image.\n");
       exit(1);
     }
-
+    
     //read in the appropriate sector set by numSector
     char *buffer = (char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
     if (read_sector(numSector, buffer) == -1) 
@@ -799,7 +804,7 @@ FileData* searchEntries(char* fileName, int numSector)
       printf("Something has gone wrong -- could not read the sector\n");
       exit(1);
     }
-
+    
     if( strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0)
     {
       fileName = fileTranslate(fileName);
@@ -827,7 +832,7 @@ FileData* searchEntries(char* fileName, int numSector)
         }
         else
         {
-
+            
             char* name = strtok(entry->fileName, " ");
 
             if(entry->fileExt[0] != ' ')
@@ -843,6 +848,7 @@ FileData* searchEntries(char* fileName, int numSector)
             if( strcmp(name, fileName) == 0 )
             {
                 fclose(FILE_SYSTEM_ID);
+                fflush(stdout);
                 return entry; 
             }
 
@@ -853,7 +859,6 @@ FileData* searchEntries(char* fileName, int numSector)
    return NULL;
 
 }
-
 
 
 /******************************************************************************
