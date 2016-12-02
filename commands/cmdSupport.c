@@ -422,7 +422,6 @@ int getSectorOffset(char *itemName, unsigned char *directory)
             for(j = 0; j < 8; j++) //This loop gets the file name
             {
                holder = (char ) directory[currentOffset +j];
-
                 if(holder <(char)0x30 || holder > (char)0x5B) //This should jump over any whitespace
                 {
                     // continue;
@@ -434,9 +433,11 @@ int getSectorOffset(char *itemName, unsigned char *directory)
                 }
 
             }
-
-            currentItemName[currentItemNameSize] = ' ';
-            currentItemNameSize++;
+            if(itemName[currentItemNameSize+1] == 0x00)
+            {
+                currentItemName[currentItemNameSize] = ' ';
+                currentItemNameSize++;
+            }
             
             for(j = 0; j < 3; j++) //this loop gets the extention
             {
@@ -453,11 +454,9 @@ int getSectorOffset(char *itemName, unsigned char *directory)
                 }
             }
            
-            printf("Debug currentItem: %s\n ItemName: %s\n", currentItemName, itemName);
             if(strcmp(currentItemName, itemName) == 0) //comparing the two strings
             {
                 fileExists = TRUE;
-                printf("Found!");
             }
             else
             {

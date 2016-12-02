@@ -37,7 +37,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        location = CPATH.sectorNum + 32;
+        location = CPATH.sectorNum + 31;
     }
     
     parsedPath = fileTranslate(argv[1]);
@@ -64,7 +64,6 @@ int main(int argc, char **argv)
         while(fatEntryNumber != 0xFFF)
         {
             currentSectorNum = get_fat_entry(fatEntryNumber, fat);
-            //set_fat_entry(fatEntryNumber, 0x000, fat);
             writeToFAT(fatEntryNumber);
             fatEntryNumber = currentSectorNum;
         }
