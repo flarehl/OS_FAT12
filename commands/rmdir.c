@@ -12,7 +12,6 @@ int main(int argc, char **argv)
     unsigned int fatEntryNumber;
     int offset, i;
     int location; //This is the actual sector number in memory
-    int workingDirectory; //When checking if the directoyr has items, thsi hod your working directory
     
     accessShmem(&shPtr); //accessing shared memory struct
     memset(CPATH.path, '\0', MAX_PATH); //CPATH is in shmem.h and MAX_PATH is in cwd.h
@@ -87,11 +86,11 @@ int main(int argc, char **argv)
         
         fatEntryNumber = get_fat_entry(directorySector->flc, fat);
         printf("Debug directorySec: %u\n", directorySector->flc);
-        writeToFAT(directorySector->flc); //these need to have a entry type added to them
+        writeToFAT(directorySector->flc, 0x000); //these need to have a entry type added to them
         while(fatEntryNumber != 0xFFF)
         {
             currentSectorNum = get_fat_entry(fatEntryNumber, fat);
-            writeToFAT(fatEntryNumber);
+            writeToFAT(fatEntryNumber, 0x000);
             fatEntryNumber = currentSectorNum;
         }
 

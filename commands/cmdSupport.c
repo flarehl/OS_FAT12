@@ -869,7 +869,7 @@ FileData* searchEntries(char* fileName, int numSector)
 *
 * Return:
 *****************************************************************************/
-bool writeToFAT(int freeCluster)
+bool writeToFAT(int freeCluster, int input)
 {
     int i;
     unsigned char* fat = readFAT12Table(1);
@@ -888,7 +888,7 @@ bool writeToFAT(int freeCluster)
         default: break;
     }
 
-    set_fat_entry(freeCluster, (int)0xfff, fat);
+    set_fat_entry(freeCluster, (int)input, fat);
     write_sector(fatSector, fat);   
 
     return TRUE;

@@ -60,11 +60,11 @@ int main(int argc, char **argv)
     {
         fatEntryNumber = get_fat_entry(directorySector->flc, fat);
         printf("Debug directorySec: %u\n", directorySector->flc);
-        writeToFAT(directorySector->flc); //these need to have a entry type added to them
+        writeToFAT(directorySector->flc, 0x000); //these need to have a entry type added to them
         while(fatEntryNumber != 0xFFF)
         {
             currentSectorNum = get_fat_entry(fatEntryNumber, fat);
-            writeToFAT(fatEntryNumber);
+            writeToFAT(fatEntryNumber, 0x000);
             fatEntryNumber = currentSectorNum;
         }
         
