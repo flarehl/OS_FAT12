@@ -4,9 +4,6 @@
 bool addDir(char**);
 int createDir(int, char*, char*, int);
 
-bool validateInput(char**);
-
-
 //*************** MKDIR IMPLEMENTATION W.I.P *******************//
 int main(int argc, char **argv){
 	
@@ -127,9 +124,14 @@ bool addDir(char **entryNames)
 				
 			i++;
 		}
-		else
+		else if((entry = searchEntries(entryNames[i], numSector)) == NULL && i != (getArgc(entryNames) - 1) )
 		{
 			printf("entry already exists\n");
+			return -1;
+		}
+		else
+		{
+			printf("HMn\n");
 			return -1;
 		}
 
@@ -194,7 +196,7 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 		i += 2;
 
 		numSector += 31;
-		writeToFAT(numSector);
+		writeToFAT(numSector,(int)0xfff);
 	}
 	else if(strcmp(fname, "..") == 0)
 	{
@@ -203,7 +205,7 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 
 		i += 2;
 
-		writeToFAT(prevSec);
+		writeToFAT(prevSec,(int)0xfff);
 	}
 	else
 	{
@@ -213,7 +215,7 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 		buffer[i] = freeCluster & 0xFF;
 
 		i+=2; //increase one more time
-		writeToFAT(freeCluster);
+		writeToFAT(freeCluster,(int)0xfff);
 
 		// set new directory buffer so offset isnt fucked, DOESNT WORK
 		unsigned char* nBuffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
@@ -235,25 +237,6 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	buffer[i] = 0;
 
 	write_sector(numSector, buffer);
-
-	printf("Successfully created directory\n\n\n");
 	return freeCluster;
 }
 
-
-/******************************************************************************
-* validateInput
-*
-* finds an unreserved entry in FAT
-*  
-* Return: logical cluster number, -1 if not found
-*****************************************************************************/
-bool validateInput(char** argv)
-{
-	//check if filename + ext is 8 chars long
-	//see specs for conversion format
-	//convert dots to spaces
-	//after dot can only be 3 chars
-
-	return 0;
-}

@@ -186,7 +186,7 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 		i += 2;
 
 		numSector += 31;
-		writeToFAT(numSector);
+		writeToFAT(numSector,(int)0xfff);
 	}
 	else if(strcmp(fname, "..") == 0)
 	{
@@ -195,7 +195,7 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 
 		i += 2;
 
-		writeToFAT(prevSec);
+		writeToFAT(prevSec,(int)0xfff);
 	}
 	else
 	{
@@ -205,7 +205,7 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 		buffer[i] = freeCluster & 0xFF;
 
 		i+=2; //increase one more time
-		writeToFAT(freeCluster);
+		writeToFAT(freeCluster, (int)0xfff);
 
 		// set new directory buffer so offset isnt fucked, DOESNT WORK
 		unsigned char* nBuffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
@@ -220,7 +220,7 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 
 	i += 3;
 
-	// set filesize
+	// set filesize, little endian
 	buffer[i--] = 0;
 	buffer[i--] = 0;
 	buffer[i--] = 0;
@@ -228,7 +228,6 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 
 	write_sector(numSector, buffer);
 
-	printf("Successfully created directory\n\n\n");
 	return freeCluster;
 }
 

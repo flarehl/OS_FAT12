@@ -30,10 +30,8 @@ int write_sector(int sector_number, unsigned char* buffer);
 void           displayLs(FileData*);
 bool           extendDirectory(int); // WORK IN PROGRESS
 char*          fileTranslate(char*);
-//int            findCluster(char*, int);
 int            findFree(unsigned char*); 
 int            findFreeCluster();
-int            findFreeFAT(); // WORK IN PROGRESS
 int            getArgc(char**);
 int            getPhysSector(int);
 int            getSectorOffset(char *itemName, unsigned char *directory);
@@ -47,6 +45,7 @@ char**         parsePath(char*);
 FileData*      readEntry(char*, int*);
 unsigned char* readFAT12Table(int FAT_Number);
 FileData*      searchEntries(char*, int);
-bool           writeToFAT(int, int);
+bool           validateEntryName(char*);
+void           writeToFAT(int, int);
 
 #endif
