@@ -70,6 +70,8 @@ bool addDir(char **entryNames)
 	}
 
 	FileData* entry, *entryBefore;
+	char *last = (char*)malloc(12 * sizeof(char));
+	strcpy(last, entryNames[getArgc(entryNames) - 1]);
 
 	// uppercase everything ignore extensions for now
 	int j;
@@ -105,7 +107,7 @@ bool addDir(char **entryNames)
 			if(validateEntryName(entryNames[getArgc(entryNames) - 1]))
 			{
 				unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
-				int nCluster = createDir(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
+				int nCluster = createDir(numSector, last, buffer, -1); 
 
 				nCluster += 31;
 
@@ -129,14 +131,9 @@ bool addDir(char **entryNames)
 				
 			i++;
 		}
-		else if((entry = searchEntries(entryNames[i], numSector)) == NULL && i != (getArgc(entryNames) - 1) )
-		{
-			printf("entry already exists\n");
-			return -1;
-		}
 		else
 		{
-			printf("HMn\n");
+			printf("entry already exists\n");
 			return -1;
 		}
 
@@ -160,17 +157,25 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	}
 
 	FileData *entry;
+	char delim[2] = ".";
+	char** tokens;
 	int offset = findFree(buffer);
 	int iOff = offset;
 	int freeCluster;
+
+	if(strcmp(fname, ".") != 0 || strcmp(fname, "..") != 0 )
+	{	
+		tokens[0] = strtok(fname, delim);
+		tokens[1] = strtok(NULL, delim);
+	}
 
 	// set filename
 	int i, j = 0;
 	for(i = offset; i < iOff + 8; i++)
 	{
-		if(j < strlen(fname))
+		if(j < strlen(tokens[0]))
 		{
-			buffer[i] = fname[j];
+			buffer[i] = (long)tokens[0][j];
 			j++;
 		}
 		else
@@ -181,9 +186,18 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	iOff += 8;
 
 	// set extension only deals with non ext name for testing
+	j = 0;
 	for(i = iOff; i < iOff + 3; i++)
 	{
-		buffer[i] = (char)0x20;
+		if(j < strlen(tokens[1]))
+		{
+			buffer[i] = (long)tokens[1][j];
+			j++;
+		}
+		else
+		{
+			buffer[i] = (char)0x20;	
+		}
 	}
 	
 	// set attribute to subdir

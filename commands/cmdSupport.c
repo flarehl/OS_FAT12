@@ -240,15 +240,15 @@ void displayLs(FileData* entry)
 *
 * Return: if the directory has been extended, return true, if the disk is 
 *       full, false
-*****************************************************************************/
-/*bool extendDirectory(int fatNum)
+*****************************************************************************
+bool extendDirectory(int fatNum)
 {
     unsigned char* fat;
     int value, i, orig = fatNum;
 
     fat = readFAT12Table(1);
 
-    while( (value = get_fat_entry(fatNum, fat)) != (char)0xfff && (value = get_fat_entry(fatNum, fat)) != (char)0xff7)
+    while( ((value = get_fat_entry(fatNum, fat)) != (char)0xfff) && (value = get_fat_entry(fatNum, fat)) != (char)0xff7)
     {
         //if dir is already multi-sector, traverse until last entry is reached
         fatNum = value;
@@ -267,8 +267,8 @@ void displayLs(FileData* entry)
     writeToFAT(freeCluster,(int)0xfff);
 
     return TRUE;
-}
-*/
+}*/ 
+
 
 /******************************************************************************
 * fileTranslate
@@ -661,7 +661,7 @@ char** parsePath(char* path)
             //maybe add error handling for reallocation of parsedInput
         }
 
-      token = strtok(NULL, slashDelim);
+        token = strtok(NULL, slashDelim);
    }
 
    args[location] = NULL; //set null terminating char for args
@@ -884,7 +884,7 @@ bool validateEntryName(char* entryName){
 
     if(i > 2)
     {
-        printf("Cannot contain more than 1 '.'\n");
+        printf("This should not work\n");
         return FALSE;
     }
 
@@ -904,7 +904,7 @@ bool validateEntryName(char* entryName){
 
 
 /******************************************************************************
-* writeToFAT
+* writeToFAT - NEEDS TO UPDATE BOTH FATs
 *
 * records changes to FAT
 *

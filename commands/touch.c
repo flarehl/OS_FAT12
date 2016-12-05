@@ -70,6 +70,8 @@ bool addFile(char **entryNames)
 	}
 
 	FileData* entry, *entryBefore;
+	char *last = (char*)malloc(12 * sizeof(char));
+	strcpy(last, entryNames[getArgc(entryNames) - 1]);
 
 	// uppercase everything ignore extensions for now
 	int j;
@@ -100,12 +102,13 @@ bool addFile(char **entryNames)
 				}
 				
 			}*/
+
 			
 			//validate the input that is to be used for the dir name
 			if(validateEntryName(entryNames[getArgc(entryNames) - 1]))
 			{
 				unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
-				createFile(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
+				createFile(numSector, last, buffer, -1); 
 
 				return 0;
 			}
@@ -152,18 +155,27 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 		return -1;
 	}
 
+
 	FileData *entry;
+	char delim[2] = ".";
+	char** tokens;
 	int offset = findFree(buffer);
 	int iOff = offset;
 	int freeCluster;
+
+	if(strcmp(fname, ".") != 0 || strcmp(fname, "..") != 0 )
+	{	
+		tokens[0] = strtok(fname, delim);
+		tokens[1] = strtok(NULL, delim);
+	}
 
 	// set filename
 	int i, j = 0;
 	for(i = offset; i < iOff + 8; i++)
 	{
-		if(j < strlen(fname))
+		if(j < strlen(tokens[0]))
 		{
-			buffer[i] = fname[j];
+			buffer[i] = (long)tokens[0][j];
 			j++;
 		}
 		else
@@ -174,9 +186,18 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 	iOff += 8;
 
 	// set extension only deals with non ext name for testing
+	j = 0;
 	for(i = iOff; i < iOff + 3; i++)
 	{
-		buffer[i] = (char)0x20;
+		if(j < strlen(tokens[1]))
+		{
+			buffer[i] = (long)tokens[1][j];
+			j++;
+		}
+		else
+		{
+			buffer[i] = (char)0x20;	
+		}
 	}
 	
 	// set attribute to subdir

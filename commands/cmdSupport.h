@@ -28,7 +28,7 @@ int write_sector(int sector_number, unsigned char* buffer);
 /* Functions added by HLeo & SBrikiatis */
 
 void           displayLs(FileData*);
-bool           extendDirectory(int); // WORK IN PROGRESS
+//bool           extendDirectory(int); // WORK IN PROGRESS
 char*          fileTranslate(char*);
 int            findFree(unsigned char*); 
 int            findFreeCluster();
