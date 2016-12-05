@@ -431,8 +431,8 @@ int getSectorOffset(char *itemName, unsigned char *directory)
                 }
 
             }
-            printf("Debug itemName: %s", itemName);
-            if(itemName[currentItemNameSize+1] == 0x00)
+
+            if(itemName[currentItemNameSize] == 0x20)
             {
                 currentItemName[currentItemNameSize] = ' ';
                 currentItemNameSize++;
