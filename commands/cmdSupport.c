@@ -262,11 +262,9 @@ bool extendDirectory(int fatNum)
 
     int freeCluster = findFreeCluster();
 
-    set_fat_entry(orig, freeCluster, fat);
-    writeToFAT(orig);
+    writeToFAT(orig, freeCluster);
 
-    set_fat_entry(freeCluster, (int)0xfff, fat);
-    writeToFAT(freeCluster);
+    writeToFAT(freeCluster,(int)0xfff);
 
     return TRUE;
 }
@@ -861,15 +859,32 @@ FileData* searchEntries(char* fileName, int numSector)
 
 
 /******************************************************************************
+* validateEntryName
+*
+* checks to make sure the user's chosen entry name is valid
+*
+* entryName: the name to be validated
+*
+* Return: true
+*****************************************************************************/
+bool validateEntryname(char* entryName){
+
+    char* token = strtok(entryName, ".");
+
+    return TRUE;
+}
+
+
+/******************************************************************************
 * writeToFAT
 *
 * records changes to FAT
 *
-* freeCluster: the 
+* freeCluster: the FAT entry number
+* value: the value to be set in the FAT
 *
-* Return:
 *****************************************************************************/
-bool writeToFAT(int freeCluster, int input)
+void writeToFAT(int freeCluster, int value)
 {
     int i;
     unsigned char* fat = readFAT12Table(1);
@@ -888,9 +903,7 @@ bool writeToFAT(int freeCluster, int input)
         default: break;
     }
 
-    set_fat_entry(freeCluster, (int)input, fat);
+    set_fat_entry(freeCluster, (int)value, fat);
     write_sector(fatSector, fat);   
-
-    return TRUE;
 }
 

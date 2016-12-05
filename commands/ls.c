@@ -89,7 +89,6 @@ int main(int argc, char** argv) {
 
 			/* WHY IS ENTRY->FILENAME SHOWING EXTENSIONS WHEN USING SEARCHENTRIES() */
 
-			//wrap into char* getType() later
 			char file[] = "file";
 			char dir[] = "dir";
 
