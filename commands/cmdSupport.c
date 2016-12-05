@@ -241,7 +241,7 @@ void displayLs(FileData* entry)
 * Return: if the directory has been extended, return true, if the disk is 
 *       full, false
 *****************************************************************************/
-bool extendDirectory(int fatNum)
+/*bool extendDirectory(int fatNum)
 {
     unsigned char* fat;
     int value, i, orig = fatNum;
@@ -270,7 +270,7 @@ bool extendDirectory(int fatNum)
 
     return TRUE;
 }
-
+*/
 
 /******************************************************************************
 * fileTranslate
@@ -433,6 +433,7 @@ int getSectorOffset(char *itemName, unsigned char *directory)
                 }
 
             }
+            printf("Debug itemName: %s", itemName);
             if(itemName[currentItemNameSize+1] == 0x00)
             {
                 currentItemName[currentItemNameSize] = ' ';

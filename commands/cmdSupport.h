@@ -47,6 +47,6 @@ char**         parsePath(char*);
 FileData*      readEntry(char*, int*);
 unsigned char* readFAT12Table(int FAT_Number);
 FileData*      searchEntries(char*, int);
-bool           writeToFAT(int);
+bool           writeToFAT(int, int);
 
 #endif
