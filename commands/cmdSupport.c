@@ -868,9 +868,36 @@ FileData* searchEntries(char* fileName, int numSector)
 *
 * Return: true
 *****************************************************************************/
-bool validateEntryname(char* entryName){
+bool validateEntryName(char* entryName){
+    int i = 0;
+    char** eName = (char**)malloc(DEFAULT_BUF_SIZE * sizeof(char));
 
-    char* token = strtok(entryName, ".");
+
+    char* name = strtok(entryName, ". ");
+
+    while( name != NULL && i < 2) 
+    {
+        eName[i] = name;
+        name = strtok(NULL, " ");
+        i++;
+    }
+
+    if(i > 2)
+    {
+        printf("Cannot contain more than 1 '.'\n");
+        return FALSE;
+    }
+
+    if( strlen(eName[0]) > 8 )
+    {
+        printf("Entry name cannot be longer than 8 characters\n");
+        return FALSE;
+    }
+    else if(strlen(eName[1]) > 3)
+    {
+        printf("Entry extension cannot be longer than 3 characters\n");
+        return FALSE;
+    }
 
     return TRUE;
 }

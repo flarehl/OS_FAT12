@@ -58,7 +58,7 @@ int main(int argc, char **argv){
 /******************************************************************************
 * addDir
 *
-* finds an unreserved entry in FAT
+* traverses and validates argument filepath, then creates directory
 *  
 * Return: logical cluster number, -1 if not found
 *****************************************************************************/
@@ -101,11 +101,19 @@ bool addFile(char **entryNames)
 				
 			}*/
 			
+			//validate the input that is to be used for the dir name
+			if(validateEntryName(entryNames[getArgc(entryNames) - 1]))
+			{
+				unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
+				createFile(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
 
-			unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
-			createFile(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
+				return 0;
+			}
+			else
+				return -1;
 
-			return 0;
+
+
 
 		}
 		else if((entry = searchEntries(entryNames[i], numSector)) != NULL && i < (getArgc(entryNames) - 1))
@@ -132,7 +140,7 @@ bool addFile(char **entryNames)
 /******************************************************************************
 * createDir
 *
-* finds an unreserved entry in FAT
+* finds free space, sets values for a new file and saves to floppy
 *  
 * Return: sector of directory created
 *****************************************************************************/

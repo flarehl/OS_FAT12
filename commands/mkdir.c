@@ -101,16 +101,21 @@ bool addDir(char **entryNames)
 				
 			}*/
 			
+			//validate the input that is to be used for the dir name
+			if(validateEntryName(entryNames[getArgc(entryNames) - 1]))
+			{
+				unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
+				int nCluster = createDir(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
 
-			unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
-			int nCluster = createDir(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
+				nCluster += 31;
 
-			nCluster += 31;
+				createDir(nCluster, ".", buffer, -1); // -1 is filler
+				createDir(nCluster, "..", buffer, entryBefore->flc);	
 
-			createDir(nCluster, ".", buffer, -1); // -1 is filler
-			createDir(nCluster, "..", buffer, entryBefore->flc);	
-
-			return 0;
+				return 0;
+			}
+			else
+				return -1;
 
 		}
 		else if((entry = searchEntries(entryNames[i], numSector)) != NULL && i < (getArgc(entryNames) - 1))
