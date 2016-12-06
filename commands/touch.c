@@ -86,7 +86,7 @@ bool addFile(char **entryNames)
 
 	i = 0;
 	while( i < getArgc(entryNames) )
-	{
+	{	
 
 		if((entry = searchEntries(entryNames[i], numSector)) == NULL && i == (getArgc(entryNames) - 1) )
 		{
@@ -168,6 +168,11 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 		tokens[0] = strtok(fname, delim);
 		tokens[1] = strtok(NULL, delim);
 	}
+	else
+	{
+		strcpy(tokens[0], fname);
+		tokens[1] = NULL;
+	}
 
 	// set filename
 	int i, j = 0;
@@ -189,7 +194,7 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 	j = 0;
 	for(i = iOff; i < iOff + 3; i++)
 	{
-		if(j < strlen(tokens[1]))
+		if( tokens[1] != NULL && j < strlen(tokens[1]) )
 		{
 			buffer[i] = (long)tokens[1][j];
 			j++;
@@ -206,7 +211,7 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 	i += 15;
 
 	// set flc
-	if(strcmp(fname, ".") == 0)
+	if(strcmp(tokens[0]	, ".") == 0)
 	{
 		numSector -= 31;
 		buffer[i+1] = (numSector << 8) & 0xFF;
@@ -217,7 +222,7 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 		numSector += 31;
 		writeToFAT(numSector,(int)0xfff);
 	}
-	else if(strcmp(fname, "..") == 0)
+	else if(strcmp(tokens[0], "..") == 0)
 	{
 		buffer[i+1] = (prevSec << 8) & 0xFF;
 		buffer[i] = prevSec & 0xFF;

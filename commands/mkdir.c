@@ -168,6 +168,11 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 		tokens[0] = strtok(fname, delim);
 		tokens[1] = strtok(NULL, delim);
 	}
+	else
+	{
+		strcpy(tokens[0], fname);
+		tokens[1] = NULL;
+	}
 
 	// set filename
 	int i, j = 0;
@@ -189,7 +194,7 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	j = 0;
 	for(i = iOff; i < iOff + 3; i++)
 	{
-		if(j < strlen(tokens[1]))
+		if(tokens[1] != NULL && j < strlen(tokens[1]))
 		{
 			buffer[i] = (long)tokens[1][j];
 			j++;

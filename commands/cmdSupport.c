@@ -232,7 +232,7 @@ void displayLs(FileData* entry)
 
 
 /******************************************************************************
-* extendDirectory -- BROKEN
+* extendDirectory 
 *
 * allocates more space for a directory
 *
@@ -240,7 +240,7 @@ void displayLs(FileData* entry)
 *
 * Return: if the directory has been extended, return true, if the disk is 
 *       full, false
-*****************************************************************************
+*****************************************************************************/
 bool extendDirectory(int fatNum)
 {
     unsigned char* fat;
@@ -267,7 +267,7 @@ bool extendDirectory(int fatNum)
     writeToFAT(freeCluster,(int)0xfff);
 
     return TRUE;
-}*/ 
+}
 
 
 /******************************************************************************
@@ -893,7 +893,7 @@ bool validateEntryName(char* entryName){
         printf("Entry name cannot be longer than 8 characters\n");
         return FALSE;
     }
-    else if(strlen(eName[1]) > 3)
+    else if(i == 2 && strlen(eName[1]) > 3)
     {
         printf("Entry extension cannot be longer than 3 characters\n");
         return FALSE;

@@ -13,7 +13,10 @@ int main(int argc, char** argv) {
 	int i;
 
 	if(argc != 3)
+	{
 		printf("Error: pfe only accepts 2 arguments\n");
+		return -1;
+	}
 
 	if ( checkRange( atoi(argv[1]), atoi(argv[2]) ) ) 
 	{
