@@ -500,7 +500,7 @@ bool isDeleted(FileData *entry)
 
    if(entry->fileName[0] == (char)0xE5)
       return TRUE;
-   else
+   elsebool
       return FALSE;
 
 }
