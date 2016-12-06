@@ -4,9 +4,6 @@
 bool addDir(char**);
 int createDir(int, char*, char*, int);
 
-bool validateInput(char**);
-
-
 //*************** MKDIR IMPLEMENTATION W.I.P *******************//
 int main(int argc, char **argv){
 	
@@ -73,6 +70,8 @@ bool addDir(char **entryNames)
 	}
 
 	FileData* entry, *entryBefore;
+	char *last = (char*)malloc(12 * sizeof(char));
+	strcpy(last, entryNames[getArgc(entryNames) - 1]);
 
 	// uppercase everything ignore extensions for now
 	int j;
@@ -104,16 +103,21 @@ bool addDir(char **entryNames)
 				
 			}*/
 			
+			//validate the input that is to be used for the dir name
+			if(validateEntryName(entryNames[getArgc(entryNames) - 1]))
+			{
+				unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
+				int nCluster = createDir(numSector, last, buffer, -1); 
 
-			unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
-			int nCluster = createDir(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
+				nCluster += 31;
 
-			nCluster += 31;
+				createDir(nCluster, ".", buffer, -1); // -1 is filler
+				createDir(nCluster, "..", buffer, entryBefore->flc);	
 
-			createDir(nCluster, ".", buffer, -1); // -1 is filler
-			createDir(nCluster, "..", buffer, entryBefore->flc);	
-
-			return 0;
+				return 0;
+			}
+			else
+				return -1;
 
 		}
 		else if((entry = searchEntries(entryNames[i], numSector)) != NULL && i < (getArgc(entryNames) - 1))
@@ -153,17 +157,30 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	}
 
 	FileData *entry;
+	char delim[2] = ".";
+	char** tokens;
 	int offset = findFree(buffer);
 	int iOff = offset;
 	int freeCluster;
+
+	if(strcmp(fname, ".") != 0 || strcmp(fname, "..") != 0 )
+	{	
+		tokens[0] = strtok(fname, delim);
+		tokens[1] = strtok(NULL, delim);
+	}
+	else
+	{
+		strcpy(tokens[0], fname);
+		tokens[1] = NULL;
+	}
 
 	// set filename
 	int i, j = 0;
 	for(i = offset; i < iOff + 8; i++)
 	{
-		if(j < strlen(fname))
+		if(j < strlen(tokens[0]))
 		{
-			buffer[i] = fname[j];
+			buffer[i] = (long)tokens[0][j];
 			j++;
 		}
 		else
@@ -174,9 +191,18 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	iOff += 8;
 
 	// set extension only deals with non ext name for testing
+	j = 0;
 	for(i = iOff; i < iOff + 3; i++)
 	{
-		buffer[i] = (char)0x20;
+		if(tokens[1] != NULL && j < strlen(tokens[1]))
+		{
+			buffer[i] = (long)tokens[1][j];
+			j++;
+		}
+		else
+		{
+			buffer[i] = (char)0x20;	
+		}
 	}
 	
 	// set attribute to subdir
@@ -194,7 +220,7 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 		i += 2;
 
 		numSector += 31;
-		writeToFAT(numSector);
+		writeToFAT(numSector,(int)0xfff);
 	}
 	else if(strcmp(fname, "..") == 0)
 	{
@@ -203,7 +229,7 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 
 		i += 2;
 
-		writeToFAT(prevSec);
+		writeToFAT(prevSec,(int)0xfff);
 	}
 	else
 	{
@@ -213,7 +239,7 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 		buffer[i] = freeCluster & 0xFF;
 
 		i+=2; //increase one more time
-		writeToFAT(freeCluster);
+		writeToFAT(freeCluster,(int)0xfff);
 
 		// set new directory buffer so offset isnt fucked, DOESNT WORK
 		unsigned char* nBuffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
@@ -235,25 +261,6 @@ int createDir(int numSector, char* fname, char* buffer, int prevSec)
 	buffer[i] = 0;
 
 	write_sector(numSector, buffer);
-
-	printf("Successfully created directory\n\n\n");
 	return freeCluster;
 }
 
-
-/******************************************************************************
-* validateInput
-*
-* finds an unreserved entry in FAT
-*  
-* Return: logical cluster number, -1 if not found
-*****************************************************************************/
-bool validateInput(char** argv)
-{
-	//check if filename + ext is 8 chars long
-	//see specs for conversion format
-	//convert dots to spaces
-	//after dot can only be 3 chars
-
-	return 0;
-}

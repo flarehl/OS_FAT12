@@ -58,7 +58,7 @@ int main(int argc, char **argv){
 /******************************************************************************
 * addDir
 *
-* finds an unreserved entry in FAT
+* traverses and validates argument filepath, then creates directory
 *  
 * Return: logical cluster number, -1 if not found
 *****************************************************************************/
@@ -70,6 +70,8 @@ bool addFile(char **entryNames)
 	}
 
 	FileData* entry, *entryBefore;
+	char *last = (char*)malloc(12 * sizeof(char));
+	strcpy(last, entryNames[getArgc(entryNames) - 1]);
 
 	// uppercase everything ignore extensions for now
 	int j;
@@ -84,7 +86,7 @@ bool addFile(char **entryNames)
 
 	i = 0;
 	while( i < getArgc(entryNames) )
-	{
+	{	
 
 		if((entry = searchEntries(entryNames[i], numSector)) == NULL && i == (getArgc(entryNames) - 1) )
 		{
@@ -100,12 +102,21 @@ bool addFile(char **entryNames)
 				}
 				
 			}*/
+
 			
+			//validate the input that is to be used for the dir name
+			if(validateEntryName(entryNames[getArgc(entryNames) - 1]))
+			{
+				unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
+				createFile(numSector, last, buffer, -1); 
 
-			unsigned char* buffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
-			createFile(numSector, entryNames[getArgc(entryNames) - 1], buffer, -1); 
+				return 0;
+			}
+			else
+				return -1;
 
-			return 0;
+
+
 
 		}
 		else if((entry = searchEntries(entryNames[i], numSector)) != NULL && i < (getArgc(entryNames) - 1))
@@ -132,7 +143,7 @@ bool addFile(char **entryNames)
 /******************************************************************************
 * createDir
 *
-* finds an unreserved entry in FAT
+* finds free space, sets values for a new file and saves to floppy
 *  
 * Return: sector of directory created
 *****************************************************************************/
@@ -144,18 +155,32 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 		return -1;
 	}
 
+
 	FileData *entry;
+	char delim[2] = ".";
+	char** tokens;
 	int offset = findFree(buffer);
 	int iOff = offset;
 	int freeCluster;
+
+	if(strcmp(fname, ".") != 0 || strcmp(fname, "..") != 0 )
+	{	
+		tokens[0] = strtok(fname, delim);
+		tokens[1] = strtok(NULL, delim);
+	}
+	else
+	{
+		strcpy(tokens[0], fname);
+		tokens[1] = NULL;
+	}
 
 	// set filename
 	int i, j = 0;
 	for(i = offset; i < iOff + 8; i++)
 	{
-		if(j < strlen(fname))
+		if(j < strlen(tokens[0]))
 		{
-			buffer[i] = fname[j];
+			buffer[i] = (long)tokens[0][j];
 			j++;
 		}
 		else
@@ -166,9 +191,18 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 	iOff += 8;
 
 	// set extension only deals with non ext name for testing
+	j = 0;
 	for(i = iOff; i < iOff + 3; i++)
 	{
-		buffer[i] = (char)0x20;
+		if( tokens[1] != NULL && j < strlen(tokens[1]) )
+		{
+			buffer[i] = (long)tokens[1][j];
+			j++;
+		}
+		else
+		{
+			buffer[i] = (char)0x20;	
+		}
 	}
 	
 	// set attribute to subdir
@@ -177,7 +211,7 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 	i += 15;
 
 	// set flc
-	if(strcmp(fname, ".") == 0)
+	if(strcmp(tokens[0]	, ".") == 0)
 	{
 		numSector -= 31;
 		buffer[i+1] = (numSector << 8) & 0xFF;
@@ -186,16 +220,16 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 		i += 2;
 
 		numSector += 31;
-		writeToFAT(numSector);
+		writeToFAT(numSector,(int)0xfff);
 	}
-	else if(strcmp(fname, "..") == 0)
+	else if(strcmp(tokens[0], "..") == 0)
 	{
 		buffer[i+1] = (prevSec << 8) & 0xFF;
 		buffer[i] = prevSec & 0xFF;
 
 		i += 2;
 
-		writeToFAT(prevSec);
+		writeToFAT(prevSec,(int)0xfff);
 	}
 	else
 	{
@@ -205,7 +239,7 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 		buffer[i] = freeCluster & 0xFF;
 
 		i+=2; //increase one more time
-		writeToFAT(freeCluster);
+		writeToFAT(freeCluster, (int)0xfff);
 
 		// set new directory buffer so offset isnt fucked, DOESNT WORK
 		unsigned char* nBuffer = (unsigned char*)malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
@@ -220,7 +254,7 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 
 	i += 3;
 
-	// set filesize
+	// set filesize, little endian
 	buffer[i--] = 0;
 	buffer[i--] = 0;
 	buffer[i--] = 0;
@@ -228,7 +262,6 @@ int createFile(int numSector, char* fname, char* buffer, int prevSec)
 
 	write_sector(numSector, buffer);
 
-	printf("Successfully created directory\n\n\n");
 	return freeCluster;
 }
 

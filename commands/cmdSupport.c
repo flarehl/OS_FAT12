@@ -232,7 +232,7 @@ void displayLs(FileData* entry)
 
 
 /******************************************************************************
-* extendDirectory -- BROKEN
+* extendDirectory 
 *
 * allocates more space for a directory
 *
@@ -248,7 +248,7 @@ bool extendDirectory(int fatNum)
 
     fat = readFAT12Table(1);
 
-    while( (value = get_fat_entry(fatNum, fat)) != (char)0xfff && (value = get_fat_entry(fatNum, fat)) != (char)0xff7)
+    while( ((value = get_fat_entry(fatNum, fat)) != (char)0xfff) && (value = get_fat_entry(fatNum, fat)) != (char)0xff7)
     {
         //if dir is already multi-sector, traverse until last entry is reached
         fatNum = value;
@@ -262,11 +262,9 @@ bool extendDirectory(int fatNum)
 
     int freeCluster = findFreeCluster();
 
-    set_fat_entry(orig, freeCluster, fat);
-    writeToFAT(orig);
+    writeToFAT(orig, freeCluster);
 
-    set_fat_entry(freeCluster, (int)0xfff, fat);
-    writeToFAT(freeCluster);
+    writeToFAT(freeCluster,(int)0xfff);
 
     return TRUE;
 }
@@ -422,7 +420,6 @@ int getSectorOffset(char *itemName, unsigned char *directory)
             for(j = 0; j < 8; j++) //This loop gets the file name
             {
                holder = (char ) directory[currentOffset +j];
-
                 if(holder <(char)0x30 || holder > (char)0x5B) //This should jump over any whitespace
                 {
                     // continue;
@@ -435,8 +432,11 @@ int getSectorOffset(char *itemName, unsigned char *directory)
 
             }
 
-            currentItemName[currentItemNameSize] = ' ';
-            currentItemNameSize++;
+            if(itemName[currentItemNameSize] == 0x20)
+            {
+                currentItemName[currentItemNameSize] = ' ';
+                currentItemNameSize++;
+            }
             
             for(j = 0; j < 3; j++) //this loop gets the extention
             {
@@ -453,11 +453,9 @@ int getSectorOffset(char *itemName, unsigned char *directory)
                 }
             }
            
-            printf("Debug currentItem: %s\n ItemName: %s\n", currentItemName, itemName);
             if(strcmp(currentItemName, itemName) == 0) //comparing the two strings
             {
                 fileExists = TRUE;
-                printf("Found!");
             }
             else
             {
@@ -663,7 +661,7 @@ char** parsePath(char* path)
             //maybe add error handling for reallocation of parsedInput
         }
 
-      token = strtok(NULL, slashDelim);
+        token = strtok(NULL, slashDelim);
    }
 
    args[location] = NULL; //set null terminating char for args
@@ -862,15 +860,59 @@ FileData* searchEntries(char* fileName, int numSector)
 
 
 /******************************************************************************
-* writeToFAT
+* validateEntryName
+*
+* checks to make sure the user's chosen entry name is valid
+*
+* entryName: the name to be validated
+*
+* Return: true
+*****************************************************************************/
+bool validateEntryName(char* entryName){
+    int i = 0;
+    char** eName = (char**)malloc(DEFAULT_BUF_SIZE * sizeof(char));
+
+
+    char* name = strtok(entryName, ". ");
+
+    while( name != NULL && i < 2) 
+    {
+        eName[i] = name;
+        name = strtok(NULL, " ");
+        i++;
+    }
+
+    if(i > 2)
+    {
+        printf("This should not work\n");
+        return FALSE;
+    }
+
+    if( strlen(eName[0]) > 8 )
+    {
+        printf("Entry name cannot be longer than 8 characters\n");
+        return FALSE;
+    }
+    else if(i == 2 && strlen(eName[1]) > 3)
+    {
+        printf("Entry extension cannot be longer than 3 characters\n");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
+/******************************************************************************
+* writeToFAT - NEEDS TO UPDATE BOTH FATs
 *
 * records changes to FAT
 *
-* freeCluster: the 
+* freeCluster: the FAT entry number
+* value: the value to be set in the FAT
 *
-* Return:
 *****************************************************************************/
-bool writeToFAT(int freeCluster)
+void writeToFAT(int freeCluster, int value)
 {
     int i;
     unsigned char* fat = readFAT12Table(1);
@@ -889,9 +931,7 @@ bool writeToFAT(int freeCluster)
         default: break;
     }
 
-    set_fat_entry(freeCluster, (int)0xfff, fat);
+    set_fat_entry(freeCluster, (int)value, fat);
     write_sector(fatSector, fat);   
-
-    return TRUE;
 }
 

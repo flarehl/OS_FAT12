@@ -1,4 +1,4 @@
-command: shmem.o cmdSupport.o pbs.o pfe.o ls.o cd.o pwd.o rm.o cat.o mkdir.o df.o touch.o
+command: shmem.o cmdSupport.o pbs.o pfe.o ls.o cd.o pwd.o rm.o cat.o mkdir.o df.o touch.o rmdir.o
 	gcc -o pbs pbs.o cmdSupport.o
 	gcc -o pfe pfe.o cmdSupport.o 
 	gcc -o ls ls.o cmdSupport.o shmem.o
@@ -9,6 +9,7 @@ command: shmem.o cmdSupport.o pbs.o pfe.o ls.o cd.o pwd.o rm.o cat.o mkdir.o df.
 	gcc -o mkdir mkdir.o cmdSupport.o shmem.o
 	gcc -o df df.o cmdSupport.o
 	gcc -o touch touch.o cmdSupport.o shmem.o
+	gcc -o rmdir rmdir.o cmdSupport.o shmem.o
 
 shmem.o: ../utilities/shmem.c ../utilities/shmem.h
 	gcc -c ../utilities/shmem.c
@@ -49,3 +50,6 @@ df.o: df.c cmdSupport.h
 
 touch.o: touch.c cmdSupport.h ../utilities/shmem.h
 	gcc -c touch.c cmdSupport.c ../utilities/shmem.c
+
+rmdir.o: rmdir.c cmdSupport.h ../utilities/shmem.h
+	gcc -c rmdir.c cmdSupport.c ../utilities/shmem.c
