@@ -21,9 +21,18 @@
 CALLER=`basename $0`         # The Caller name
 SILENT="no"                  # User wants prompts
 let "errorCounter = 0"
-SHELL=$1
+#SHELL=$1
 
-./SHELL
+# start first process as a coprocess to the current shell
+coproc ./shell
+
+# now ${COPROC[0]} contains the number of an open (input) file descriptor
+# connected to the output of proc1, and ${COPROC[1]} the number of an
+# open (output) file descriptor connected to the input of proc1.
+
+echo "Hello World" >&${COPROC[1]}
+
+#/shell
 
 #/my/bash/script < echo 'This string will be sent to stdin.'
 
@@ -198,57 +207,57 @@ myrmdir "dir dir2"
 #================
 mypbs()
 {
-	/my/bash/script < echo 'pbs'
+	echo "pbs" >&${COPROC[1]}
 }
 
 mypfe()
 {
-	/my/bash/script < echo 'pfe'
+	echo "pfe" >&${COPROC[1]}
 }
 
 mydf()
 {
-	/my/bash/script < echo 'df'
+	echo "df" >&${COPROC[1]}
 }
 
 mycat() #x - filename
 {
-	/my/bash/script < echo 'cat ' += $1
+	echo "cat" += $1 >&${COPROC[1]}
 }
 
 mycd() #x - directory
 {
-	/my/bash/script < echo 'cd ' += $1
+	echo "cd" += $1 >&${COPROC[1]}
 }
 
 myls() #x - directory
 {
-	/my/bash/script < echo 'ls ' += $1
+	echo "ls" += $1 >&${COPROC[1]}
 }
 
 mymkdir() #x - directory
 {
-	/my/bash/script < echo 'mkdir ' += $1
+	echo "mkdir" += $1 >&${COPROC[1]}
 }
 
 mypwd()
 {
-	/my/bash/script < echo 'pwd ' += $1
+	echo "pwd" += $1 >&${COPROC[1]}
 }
 
 myrm() #x - directory
 {
-	/my/bash/script < echo 'rm ' += $1
+	echo "rm" += $1 >&${COPROC[1]}
 }
 
 myrmdir() #x - directory
 {
-	/my/bash/script < echo 'rmdir ' += $1
+	echo "rmdir" += $1 >&${COPROC[1]}
 }
 
 mytouch() #x - directory
 {
-	/my/bash/script < echo 'touch ' += $1
+	echo "touch" += $1 >&${COPROC[1]}
 }
 
 terminate()
