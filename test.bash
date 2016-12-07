@@ -18,13 +18,89 @@
 #
 ########################################################
 
+
+#coproc ./fat12
+
+{ coproc ./fat12 { ./fat12 logfile ;} >&3 ;} 3>&1
+
+#================
+# Test Functions
+#================
+mypbs()
+{
+	echo "pbs" >&${COPROC[1]}
+}
+
+mypfe()
+{
+	echo "pfe" >&${COPROC[1]}
+}
+
+mydf()
+{
+	echo "df" >&${COPROC[1]}
+}
+
+mycat() #x - filename
+{
+	echo "cat" += $1 >&${COPROC[1]}
+}
+
+mycd() #x - directory
+{
+	echo "cd" += $1 >&${COPROC[1]}
+}
+
+myls() #x - directory
+{
+	echo "ls" += $1 >&${COPROC[1]}
+}
+
+mymkdir() #x - directory
+{
+	echo "mkdir" += $1 >&${COPROC[1]}
+}
+
+mypwd()
+{
+	echo "pwd" += $1 >&${COPROC[1]}
+}
+
+myrm() #x - directory
+{
+	echo "rm" += $1 >&${COPROC[1]}
+}
+
+myrmdir() #x - directory
+{
+	echo "rmdir" += $1 >&${COPROC[1]}
+}
+
+mytouch() #x - directory
+{
+	echo "touch" += $1 >&${COPROC[1]}
+}
+
+terminate()
+{
+ echo "The execution of $CALLER was not successful."
+ echo "$CALLER terminated, exiting now with rc=1."
+ dateTest=`date`
+ echo "End of testing at: $dateTest"
+ echo ""
+ exit 1
+}
+
+#================
+# Functions End
+#================
+
 CALLER=`basename $0`         # The Caller name
 SILENT="no"                  # User wants prompts
 let "errorCounter = 0"
 #SHELL=$1
 
 # start first process as a coprocess to the current shell
-coproc ./shell
 
 # now ${COPROC[0]} contains the number of an open (input) file descriptor
 # connected to the output of proc1, and ${COPROC[1]} the number of an
@@ -202,70 +278,3 @@ myrmdir "dir dir2"
 #==================
 
 
-#================
-# Test Functions
-#================
-mypbs()
-{
-	echo "pbs" >&${COPROC[1]}
-}
-
-mypfe()
-{
-	echo "pfe" >&${COPROC[1]}
-}
-
-mydf()
-{
-	echo "df" >&${COPROC[1]}
-}
-
-mycat() #x - filename
-{
-	echo "cat" += $1 >&${COPROC[1]}
-}
-
-mycd() #x - directory
-{
-	echo "cd" += $1 >&${COPROC[1]}
-}
-
-myls() #x - directory
-{
-	echo "ls" += $1 >&${COPROC[1]}
-}
-
-mymkdir() #x - directory
-{
-	echo "mkdir" += $1 >&${COPROC[1]}
-}
-
-mypwd()
-{
-	echo "pwd" += $1 >&${COPROC[1]}
-}
-
-myrm() #x - directory
-{
-	echo "rm" += $1 >&${COPROC[1]}
-}
-
-myrmdir() #x - directory
-{
-	echo "rmdir" += $1 >&${COPROC[1]}
-}
-
-mytouch() #x - directory
-{
-	echo "touch" += $1 >&${COPROC[1]}
-}
-
-terminate()
-{
- echo "The execution of $CALLER was not successful."
- echo "$CALLER terminated, exiting now with rc=1."
- dateTest=`date`
- echo "End of testing at: $dateTest"
- echo ""
- exit 1
-}
